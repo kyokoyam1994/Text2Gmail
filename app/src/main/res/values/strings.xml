@@ -1,0 +1,47 @@
+<resources>
+    <string name="app_name">Text2Gmail</string>
+    <string name="tab_text_1">Status</string>
+    <string name="tab_text_2">Messages</string>
+    <string name="tab_text_3">Settings</string>
+    <string name="action_settings">Settings</string>
+
+    //Email Config Strings
+    <string name="status_label_text_running">Running</string>
+    <string name="status_label_text_stopped">Stopped</string>
+    <string name="status_label_text_not_scheduled">Not Scheduled</string>
+    <string name="status_label_text_not_configured">Not Configured</string>
+    <string name="service_status_text">Service Status</string>
+    <string name="scheduling_mode_status_text">Scheduling Mode</string>
+    <string name="set_schedule_button_text">Set Schedule</string>
+    <string name="email_configuration_text">Email Configuration</string>
+
+    <string name="email_fragment_dialog_prompt_text">Please enter your e-mail address:</string>
+    <string name="email_fragment_dialog_invalid_address_text">Not a valid email address</string>
+    <string name="email_fragment_dialog_not_gmail_text">Please enter a valid Gmail address</string>
+
+
+    //Message Log Strings
+    <string name="empty_message_text">No messages have been sent</string>
+    <string name="clear_log_button_text">Clear</string>
+    <string name="date_received">Date Received</string>
+    <string name="sender">Sender</string>
+    <string-array name="sort_options">
+        <item>@string/date_received</item>
+        <item>@string/sender</item>
+    </string-array>>
+
+    //Settings Strings
+    <string name="missed_calls_text">Forward Missed Calls</string>
+    <string name="blocked_contacts_text">Blocked Contacts</string>
+    <string name="blocked_contacts_manual_text">Manual</string>
+    <string name="blocked_contacts_from_book_text">From Contacts</string>
+
+
+    //Shared Preference Keys
+    <string name="service_on_key">SERVICE_ON_KEY</string>
+
+    //Misc Strings
+    <string name="search">Search</string>
+
+
+</resources>
