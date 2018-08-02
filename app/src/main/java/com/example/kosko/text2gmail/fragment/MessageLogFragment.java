@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -88,7 +89,7 @@ public class MessageLogFragment extends ListFragment implements View.OnClickList
         @Override
         protected List<LogEntry> doInBackground(String... strings) {
             if(strings.length > 0 && CLEAR_OPERATION.equals(strings[0])) AppDatabase.getInstance(getActivity()).logEntryDao().deleteAll();
-            if(sortOption.equals(R.string.sender)) return AppDatabase.getInstance(getActivity()).logEntryDao().getAllBySender();
+            if(sortOption.equals(getString(R.string.sender))) return AppDatabase.getInstance(getActivity()).logEntryDao().getAllBySender();
             else return AppDatabase.getInstance(getActivity()).logEntryDao().getAllByTimestamp();
         }
 

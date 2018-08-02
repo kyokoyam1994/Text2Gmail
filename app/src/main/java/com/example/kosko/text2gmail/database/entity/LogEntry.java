@@ -12,14 +12,12 @@ public class LogEntry {
     private int id;
 
     private String senderNumber;
-    private String senderName;
     private String message;
     private Date dateReceived;
     private boolean sendSuccessful;
 
     public LogEntry(String senderNumber, String senderName, String message, Date dateReceived, boolean sendSuccessful) {
         this.senderNumber = senderNumber;
-        this.senderName = senderName;
         this.message = message;
         this.dateReceived = dateReceived;
         this.sendSuccessful = sendSuccessful;
@@ -39,14 +37,6 @@ public class LogEntry {
 
     public void setSenderNumber(String senderNumber) {
         this.senderNumber = senderNumber;
-    }
-
-    public String getSenderName() {
-        return senderName;
-    }
-
-    public void setSenderName(String senderName) {
-        this.senderName = senderName;
     }
 
     public String getMessage() {

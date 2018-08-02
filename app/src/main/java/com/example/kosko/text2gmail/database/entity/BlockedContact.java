@@ -10,7 +10,6 @@ public class BlockedContact {
     @PrimaryKey
     @NonNull
     private String blockedNumber;
-    private String blockedName;
 
     public String getBlockedNumber() {
         return blockedNumber;
@@ -18,14 +17,6 @@ public class BlockedContact {
 
     public void setBlockedNumber(String blockedNumber) {
         this.blockedNumber = blockedNumber;
-    }
-
-    public String getBlockedName() {
-        return blockedName;
-    }
-
-    public void setBlockedName(String blockedName) {
-        this.blockedName = blockedName;
     }
 
 }

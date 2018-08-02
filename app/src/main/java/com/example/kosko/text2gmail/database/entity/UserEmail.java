@@ -12,14 +12,6 @@ public class UserEmail {
     @NonNull
     private String emailAddress;
 
-    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
-    private byte[] salt;
-
-    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
-    private byte[] hashedPassword;
-
-    private boolean primary;
-
     public String getEmailAddress() {
         return emailAddress;
     }
@@ -28,27 +20,4 @@ public class UserEmail {
         this.emailAddress = emailAddress;
     }
 
-    public byte[] getSalt() {
-        return salt;
-    }
-
-    public void setSalt(byte[] salt) {
-        this.salt = salt;
-    }
-
-    public byte[] getHashedPassword() {
-        return hashedPassword;
-    }
-
-    public void setHashedPassword(byte[] hashedPassword) {
-        this.hashedPassword = hashedPassword;
-    }
-
-    public boolean isPrimary() {
-        return primary;
-    }
-
-    public void setPrimary(boolean primary) {
-        this.primary = primary;
-    }
 }
