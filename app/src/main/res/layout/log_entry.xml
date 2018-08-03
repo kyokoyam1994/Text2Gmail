@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="8dp"
         android:text="Sender"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -21,10 +21,13 @@
         android:id="@+id/logEntryMessageTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
         android:text="Message"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/logEntrySenderTextView"
-        app:layout_constraintTop_toBottomOf="@+id/logEntrySenderTextView" />
+        app:layout_constraintTop_toBottomOf="@+id/logEntrySenderTextView"
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/logEntryDateTextView"

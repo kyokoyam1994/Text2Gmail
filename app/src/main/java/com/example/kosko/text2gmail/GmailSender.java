@@ -25,7 +25,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
-public class GMailSender extends Authenticator {
+public class GmailSender extends Authenticator {
 
     private String mailhost = "smtp.gmail.com";
     private String user;
@@ -37,7 +37,7 @@ public class GMailSender extends Authenticator {
         Security.addProvider(new JSSEProvider());
     }
 
-    public GMailSender(String user, String password) {
+    public GmailSender(String user, String password) {
         this.user = user;
         this.password = password;
 

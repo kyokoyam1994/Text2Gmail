@@ -19,6 +19,17 @@
     <string name="email_fragment_dialog_invalid_address_text">Not a valid email address</string>
     <string name="email_fragment_dialog_not_gmail_text">Please enter a valid Gmail address</string>
 
+    //Daily Scheduler Strings
+    <string name="button_start_time_text">Start Time</string>>
+    <string name="button_end_time_text">End Time</string>>
+    <string name="button_apply_text">Apply</string>
+    <string name="mon_abbr">M</string>
+    <string name="tue_abbr">T</string>
+    <string name="wed_abbr">W</string>
+    <string name="thu_abbr">T</string>
+    <string name="fri_abbr">F</string>
+    <string name="sat_abbr">S</string>
+    <string name="sun_abbr">S</string>
 
     //Message Log Strings
     <string name="empty_message_text">No messages have been sent</string>
@@ -36,12 +47,9 @@
     <string name="blocked_contacts_manual_text">Manual</string>
     <string name="blocked_contacts_from_book_text">From Contacts</string>
 
-
     //Shared Preference Keys
     <string name="service_on_key">SERVICE_ON_KEY</string>
 
     //Misc Strings
     <string name="search">Search</string>
-
-
 </resources>

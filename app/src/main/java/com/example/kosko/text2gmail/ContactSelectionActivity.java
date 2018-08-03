@@ -8,14 +8,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 
 public class ContactSelectionActivity extends AppCompatActivity {
 
     private ListView listViewContacts;
-    private SimpleCursorAdapter mCursorAdapter;
+    private ContactSelectionAdapter mCursorAdapter;
     private static final String[] FROM_COLUMNS = {ContactsContract.Contacts.DISPLAY_NAME_PRIMARY};
-    private static final int[] TO_IDS = {android.R.id.text1};
+    private static final int[] TO_IDS = {R.id.textViewContactName};
+
     private static final String[] PROJECTION = {ContactsContract.Contacts._ID, ContactsContract.Contacts.LOOKUP_KEY, ContactsContract.Contacts.DISPLAY_NAME_PRIMARY};
 
 
@@ -25,12 +25,9 @@ public class ContactSelectionActivity extends AppCompatActivity {
         setContentView(R.layout.contact_selection);
 
         listViewContacts = findViewById(R.id.listViewContacts);
-        ContentResolver cr = getContentResolver();
-        Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,null, null, null, null);
-        mCursorAdapter = new SimpleCursorAdapter(this, R.layout.contact_list_item, cur, FROM_COLUMNS, TO_IDS,0);
-
-        System.out.println("Count" + mCursorAdapter.getCount());
-
+        ContentResolver contentResolver = getContentResolver();
+        Cursor cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI,null, null, null, null);
+        mCursorAdapter = new ContactSelectionAdapter(this, R.layout.contact_list_item, cursor, FROM_COLUMNS, TO_IDS,0);
         listViewContacts.setAdapter(mCursorAdapter);
     }
 

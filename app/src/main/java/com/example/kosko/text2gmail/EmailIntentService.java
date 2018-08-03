@@ -59,14 +59,14 @@ public class EmailIntentService extends IntentService {
 
             boolean sendSuccess = true;
             try {
-                GMailSender sender = new GMailSender(EMAIL_ADDRESS, PASSWORD);
+                GmailSender sender = new GmailSender(EMAIL_ADDRESS, PASSWORD);
                 sender.sendMail(emailSubject, emailBody, EMAIL_ADDRESS, EMAIL_ADDRESS);
             } catch (Exception e) {
                 e.printStackTrace();
                 sendSuccess = false;
             }
 
-            LogEntry entry = new LogEntry(senderNumber, senderName, smsContents, new Date(smsDateReceived), sendSuccess);
+            LogEntry entry = new LogEntry(senderNumber, smsContents, new Date(smsDateReceived), sendSuccess);
             AppDatabase.getInstance(getApplicationContext()).logEntryDao().insert(entry);
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(MessageLogFragment.REFRESH_INTENT));
         }

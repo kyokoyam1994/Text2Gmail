@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -52,7 +51,6 @@ public class MessageLogFragment extends ListFragment implements View.OnClickList
     public void onResume() {
         super.onResume();
         refreshLog();
-        System.out.println("Registering...");
         logUpdateBroadcastReceiver = new LogUpdateBroadcastReceiver();
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(logUpdateBroadcastReceiver, new IntentFilter(REFRESH_INTENT));
     }
@@ -60,10 +58,8 @@ public class MessageLogFragment extends ListFragment implements View.OnClickList
     @Override
     public void onPause() {
         super.onPause();
-        System.out.println("Unregistering...");
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(logUpdateBroadcastReceiver);
     }
-
 
     @Override
     public void onClick(View v) {
@@ -83,7 +79,6 @@ public class MessageLogFragment extends ListFragment implements View.OnClickList
     }
 
     private class LogEntryTask extends AsyncTask<String, Void, List<LogEntry>> {
-
         private String sortOption = spinnerSortLog.getSelectedItem().toString();
 
         @Override
@@ -103,7 +98,6 @@ public class MessageLogFragment extends ListFragment implements View.OnClickList
     private class LogUpdateBroadcastReceiver extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
-            System.out.println("Log update called!!!");
             refreshLog();
         }
     }

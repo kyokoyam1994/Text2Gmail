@@ -16,7 +16,7 @@ public class LogEntry {
     private Date dateReceived;
     private boolean sendSuccessful;
 
-    public LogEntry(String senderNumber, String senderName, String message, Date dateReceived, boolean sendSuccessful) {
+    public LogEntry(String senderNumber, String message, Date dateReceived, boolean sendSuccessful) {
         this.senderNumber = senderNumber;
         this.message = message;
         this.dateReceived = dateReceived;
