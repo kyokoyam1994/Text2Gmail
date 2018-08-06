@@ -7,6 +7,9 @@ import android.widget.TimePicker;
 
 public class DailySchedulerActivity extends AppCompatActivity implements View.OnClickListener{
 
+    private long startTime = 0;
+    private long endTime = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,7 +22,14 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
             case R.id.buttonApply:
                 applySelection();
                 break;
+            case R.id.buttonOK:
+                confirmSelection();
+                break;
         }
+    }
+
+    private void confirmSelection(){
+        //OK Button Action
     }
 
     private void applySelection(){
@@ -30,8 +40,7 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
         //findViewById(R.id.checkBoxFri).isSelected();
         //findViewById(R.id.checkBoxSat).isSelected();
         //findViewById(R.id.checkBoxSun).isSelected();
-
-        TimePicker timePicker = findViewById(R.id.timePickerStartTime);
+        //timePicker.
         //timePicker.getHour();
         //timePicker.getMinute();
     }
