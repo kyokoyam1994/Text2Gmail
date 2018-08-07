@@ -132,7 +132,6 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         if (isChecked) state = PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
         packageManager.setComponentEnabledSetting(componentName, state, PackageManager.DONT_KILL_APP);
         updateStatusCircle(getView(), isChecked);
-        //System.out.println("Test: " + state);
     }
 
     private void updateStatusCircle(View view, boolean on){

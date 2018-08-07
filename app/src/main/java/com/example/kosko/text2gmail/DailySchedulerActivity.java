@@ -3,22 +3,38 @@ package com.example.kosko.text2gmail;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.TimePicker;
+import android.widget.Button;
+import android.widget.EditText;
 
-public class DailySchedulerActivity extends AppCompatActivity implements View.OnClickListener{
+public class DailySchedulerActivity extends AppCompatActivity implements View.OnClickListener, View.OnFocusChangeListener{
 
     private long startTime = 0;
     private long endTime = 0;
+
+    private Button buttonApply;
+    private Button buttonOK;
+    private EditText editTextStartTime;
+    private EditText editTextEndTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.daily_scheduler_activity);
+
+        buttonApply = findViewById(R.id.buttonApply);
+        buttonOK = findViewById(R.id.buttonOK);
+        editTextStartTime = findViewById(R.id.editTextStartTime);
+        editTextEndTime = findViewById(R.id.editTextEndTime);
+
+        buttonApply.setOnClickListener(this);
+        buttonOK.setOnClickListener(this);
+        editTextStartTime.setOnFocusChangeListener(this);
+        editTextEndTime.setOnFocusChangeListener(this);
     }
 
     @Override
-    public void onClick(View v) {
-        switch (v.getId()){
+    public void onClick(View view) {
+        switch (view.getId()){
             case R.id.buttonApply:
                 applySelection();
                 break;
@@ -28,8 +44,20 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
         }
     }
 
+    @Override
+    public void onFocusChange(View view, boolean hasFocus) {
+        switch (view.getId()){
+            case R.id.editTextStartTime:
+                if(hasFocus) TimePickerDialogFragment.newInstance(R.string.start_time_label_text).show(getSupportFragmentManager(), "Start");
+                break;
+            case R.id.editTextEndTime:
+                if(hasFocus) TimePickerDialogFragment.newInstance(R.string.end_time_label_text).show(getSupportFragmentManager(), "End");
+                break;
+        }
+    }
+
     private void confirmSelection(){
-        //OK Button Action
+
     }
 
     private void applySelection(){
@@ -40,9 +68,6 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
         //findViewById(R.id.checkBoxFri).isSelected();
         //findViewById(R.id.checkBoxSat).isSelected();
         //findViewById(R.id.checkBoxSun).isSelected();
-        //timePicker.
-        //timePicker.getHour();
-        //timePicker.getMinute();
     }
 
 }

@@ -9,7 +9,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.widget.ListView;
 
-public class ContactSelectionActivity extends AppCompatActivity {
+public class ContactSelectionActivity extends AppCompatActivity{
 
     private ListView listViewContacts;
     private ContactSelectionAdapter mCursorAdapter;
@@ -17,7 +17,6 @@ public class ContactSelectionActivity extends AppCompatActivity {
     private static final int[] TO_IDS = {R.id.textViewContactName};
 
     private static final String[] PROJECTION = {ContactsContract.Contacts._ID, ContactsContract.Contacts.LOOKUP_KEY, ContactsContract.Contacts.DISPLAY_NAME_PRIMARY};
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +36,6 @@ public class ContactSelectionActivity extends AppCompatActivity {
         inflater.inflate(R.menu.options_menu, menu);
         return true;
     }
-
         /*
     public void getContacts() {
         ContentResolver cr = getContentResolver();
@@ -63,6 +61,5 @@ public class ContactSelectionActivity extends AppCompatActivity {
         }
         cur.close();
     }*/
-
 
 }

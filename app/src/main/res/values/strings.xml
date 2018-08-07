@@ -22,6 +22,7 @@
     //Daily Scheduler Strings
     <string name="start_time_label_text">Start Time</string>>
     <string name="end_time_label_text">End Time</string>>
+    <string name="time_picker_dialog_fragment_message">Please enter a time:</string>>
     <string name="button_apply_text">Apply</string>
     <string name="button_ok_text">OK</string>
     <string name="mon_abbr">M</string>
