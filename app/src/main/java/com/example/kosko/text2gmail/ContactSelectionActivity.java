@@ -36,7 +36,8 @@ public class ContactSelectionActivity extends AppCompatActivity{
         inflater.inflate(R.menu.options_menu, menu);
         return true;
     }
-        /*
+
+    /*
     public void getContacts() {
         ContentResolver cr = getContentResolver();
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,

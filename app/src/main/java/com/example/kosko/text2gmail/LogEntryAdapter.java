@@ -1,10 +1,6 @@
 package com.example.kosko.text2gmail;
 
-import android.content.ContentResolver;
 import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -15,9 +11,12 @@ import android.widget.TextView;
 
 import com.example.kosko.text2gmail.database.entity.LogEntry;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class LogEntryAdapter extends ArrayAdapter<LogEntry> {
+
+    private HashMap<String, String> contactNameMap;
 
     public LogEntryAdapter(@NonNull Context context, int resource, @NonNull List<LogEntry> objects) {
         super(context, resource, objects);
@@ -38,7 +37,7 @@ public class LogEntryAdapter extends ArrayAdapter<LogEntry> {
         TextView sendSuccessful = v.findViewById(R.id.logEntrySendSuccessful);
 
         //Find a way to move this method outside of the main thread when calling from getView()
-        String contactName = findContactNameByNumber(entry.getSenderNumber());
+        String contactName = Util.findContactNameByNumber(getContext(), entry.getSenderNumber());
         sender.setText(contactName == null ? entry.getSenderNumber() : contactName);
         message.setText(entry.getMessage());
         date.setText(entry.getDateReceived().toString());
@@ -47,19 +46,6 @@ public class LogEntryAdapter extends ArrayAdapter<LogEntry> {
         else sendSuccessful.setText("Failed");
 
         return v;
-    }
-
-    private String findContactNameByNumber(String phoneNumber){
-        //Should check for permission here for contacts access
-        String contactName = null;
-        ContentResolver contentResolver = getContext().getContentResolver();
-        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
-        Cursor cursor = contentResolver.query(uri, new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
-        if(cursor != null && cursor.moveToFirst()){
-            contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
-            cursor.close();
-        }
-        return contactName;
     }
 
 }

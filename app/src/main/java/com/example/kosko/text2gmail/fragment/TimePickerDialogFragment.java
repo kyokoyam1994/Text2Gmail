@@ -1,8 +1,6 @@
-package com.example.kosko.text2gmail;
+package com.example.kosko.text2gmail.fragment;
 
 import android.app.Dialog;
-import android.app.TimePickerDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -10,6 +8,8 @@ import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TimePicker;
+
+import com.example.kosko.text2gmail.R;
 
 public class TimePickerDialogFragment extends AppCompatDialogFragment{
 

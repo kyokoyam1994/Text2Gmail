@@ -15,10 +15,6 @@
     <string name="set_schedule_button_text">Set Schedule</string>
     <string name="email_configuration_text">Email Configuration</string>
 
-    <string name="email_fragment_dialog_prompt_text">Please enter your e-mail address:</string>
-    <string name="email_fragment_dialog_invalid_address_text">Not a valid email address</string>
-    <string name="email_fragment_dialog_not_gmail_text">Please enter a valid Gmail address</string>
-
     //Daily Scheduler Strings
     <string name="start_time_label_text">Start Time</string>>
     <string name="end_time_label_text">End Time</string>>
@@ -49,8 +45,14 @@
     <string name="blocked_contacts_manual_text">Manual</string>
     <string name="blocked_contacts_from_book_text">From Contacts</string>
 
+    <string name="blocked_contacts_manual_dialog_text">Please enter a phone number to block:</string>
+    <string name="email_fragment_dialog_prompt_text">Please enter your e-mail address:</string>
+    <string name="email_fragment_dialog_invalid_address_text">Not a valid email address</string>
+    <string name="email_fragment_dialog_not_gmail_text">Please enter a valid Gmail address</string>
+
+
     //Shared Preference Keys
-    <string name="service_on_key">SERVICE_ON_KEY</string>
+    <string name="forward_missed_calls_key">FORWARD_MISSED_CALLS_KEY</string>
 
     //Misc Strings
     <string name="search">Search</string>

@@ -17,14 +17,12 @@ public class EmailIntentService extends IntentService {
     private final static String PASSWORD = "password1234";
 
     public static final String EMAIL_TYPE = "EMAIL_TYPE";
-    public static final String SMS_SENDER_NUMBER = "SMS_SENDER_NUMBER";
-    public static final String SMS_SENDER_NAME = "SMS_SENDER_NAME";
-    public static final String SMS_CONTENTS = "SMS_CONTENTS";
-    public static final String SMS_DATE_RECEIVED = "SMS_DATE_RECEIVED";
-
     public static final String EMAIL_TYPE_SMS = "SMS";
     public static final String EMAIL_TYPE_MISSED_CALL = "MISSED_CALL";
 
+    public static final String SMS_SENDER_NUMBER = "SMS_SENDER_NUMBER";
+    public static final String SMS_CONTENTS = "SMS_CONTENTS";
+    public static final String SMS_DATE_RECEIVED = "SMS_DATE_RECEIVED";
 
     public EmailIntentService() {
         this("EmailIntentService");
@@ -38,19 +36,19 @@ public class EmailIntentService extends IntentService {
     protected void onHandleIntent(@Nullable Intent intent) {
         if(intent != null) {
             String senderNumber = intent.getStringExtra(SMS_SENDER_NUMBER);
-            String senderName = intent.getStringExtra(SMS_SENDER_NAME);
             String smsContents = intent.getStringExtra(SMS_CONTENTS);
             long smsDateReceived = intent.getLongExtra(SMS_DATE_RECEIVED, System.currentTimeMillis());
 
+            String senderName = Util.findContactNameByNumber(this, senderNumber);
             String emailSubject = null;
             String emailBody = null;
             switch (intent.getStringExtra(EMAIL_TYPE)) {
                 case EMAIL_TYPE_SMS:
-                    emailSubject = "New Message From " + senderNumber;
+                    emailSubject = "New Message From " + (senderName == null ? senderNumber : senderName);
                     emailBody = smsContents;
                     break;
                 case EMAIL_TYPE_MISSED_CALL:
-                    emailSubject = "Missed Call From " + senderNumber;
+                    emailSubject = "Missed Call From " + (senderName == null ? senderNumber : senderName);
                     emailBody = "Call received on " + new Date(smsDateReceived).toString();
                     break;
                 default:

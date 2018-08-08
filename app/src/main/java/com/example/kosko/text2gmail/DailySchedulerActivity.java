@@ -6,6 +6,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.example.kosko.text2gmail.fragment.TimePickerDialogFragment;
+
 public class DailySchedulerActivity extends AppCompatActivity implements View.OnClickListener, View.OnFocusChangeListener{
 
     private long startTime = 0;

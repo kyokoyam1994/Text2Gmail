@@ -20,7 +20,7 @@ import android.widget.TextView;
 
 import com.example.kosko.text2gmail.DailySchedulerActivity;
 import com.example.kosko.text2gmail.R;
-import com.example.kosko.text2gmail.receiver.SMSBroadcastReceiver;
+import com.example.kosko.text2gmail.receiver.SMSMissedCallBroadcastReceiver;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -49,7 +49,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         ImageButton addEmailButton = view.findViewById(R.id.addEmailButton);
 
         PackageManager packageManager = getActivity().getPackageManager();
-        ComponentName componentName = new ComponentName(getActivity(), SMSBroadcastReceiver.class);
+        ComponentName componentName = new ComponentName(getActivity(), SMSMissedCallBroadcastReceiver.class);
         int state = packageManager.getComponentEnabledSetting(componentName);
         switchServiceStatus.setChecked(state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
         updateStatusCircle(view, state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
@@ -127,7 +127,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
 
     public void toggleServiceStatus(boolean isChecked) {
         PackageManager packageManager = getActivity().getPackageManager();
-        ComponentName componentName = new ComponentName(getActivity(), SMSBroadcastReceiver.class);
+        ComponentName componentName = new ComponentName(getActivity(), SMSMissedCallBroadcastReceiver.class);
         int state = PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
         if (isChecked) state = PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
         packageManager.setComponentEnabledSetting(componentName, state, PackageManager.DONT_KILL_APP);
