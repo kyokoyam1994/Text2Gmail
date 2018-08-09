@@ -17,18 +17,33 @@ import com.example.kosko.text2gmail.R;
 
 public class SettingsFragment extends Fragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
+    private static final int RC_CONTACT_MANUAL = 1001;
+    private static final int RC_CONTACT_FROM_BOOK = 2001;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.settings_fragment, container, false);
         CheckBox checkBoxMissedCalls = view.findViewById(R.id.checkBoxMissedCalls);
+        Button buttonBlockContactsManual = view.findViewById(R.id.buttonBlockContactsManual);
+        Button buttonBlockContactsFromBook = view.findViewById(R.id.buttonBlockContactsFromBook);
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         checkBoxMissedCalls.setChecked(preferences.getBoolean(getString(R.string.forward_missed_calls_key), true));
 
-        Button buttonBlockContactsFromBook = view.findViewById(R.id.buttonBlockContactsFromBook);
         checkBoxMissedCalls.setOnCheckedChangeListener(this);
+        buttonBlockContactsManual.setOnClickListener(this);
         buttonBlockContactsFromBook.setOnClickListener(this);
         return view;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_CONTACT_MANUAL) {
+            String blockedNumber = data.getStringExtra(ContactsManualDialogFragment.BLOCKED_CONTACT_MANUAL_KEY);
+        } else if(requestCode == RC_CONTACT_FROM_BOOK) {
+            //Handle Contact From Book
+        }
     }
 
     @Override
@@ -53,12 +68,14 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
     }
 
     public void blockContactsManually(){
-
+        ContactsManualDialogFragment dialog = ContactsManualDialogFragment.newInstance();
+        dialog.setTargetFragment(this, RC_CONTACT_MANUAL);
+        dialog.show(getActivity().getSupportFragmentManager(), "Manual Contacts");
     }
 
     public void blockContactsFromBook(){
-        Intent i = new Intent(getActivity(), ContactSelectionActivity.class);
-        startActivity(i);
+        Intent intent = new Intent(getActivity(), ContactSelectionActivity.class);
+        startActivityForResult(intent, RC_CONTACT_FROM_BOOK);
     }
 
     public void toggleForwardMissedCalls(boolean isChecked) {

@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.example.kosko.text2gmail.database.AppDatabase;
 import com.example.kosko.text2gmail.database.entity.LogEntry;
@@ -12,6 +13,8 @@ import com.example.kosko.text2gmail.fragment.MessageLogFragment;
 import java.util.Date;
 
 public class EmailIntentService extends IntentService {
+
+    private static final String TAG = EmailIntentService.class.getName();
 
     private final static String EMAIL_ADDRESS = "koskosyokoyama@gmail.com";
     private final static String PASSWORD = "password1234";
@@ -40,8 +43,8 @@ public class EmailIntentService extends IntentService {
             long smsDateReceived = intent.getLongExtra(SMS_DATE_RECEIVED, System.currentTimeMillis());
 
             String senderName = Util.findContactNameByNumber(this, senderNumber);
-            String emailSubject = null;
-            String emailBody = null;
+            String emailSubject;
+            String emailBody;
             switch (intent.getStringExtra(EMAIL_TYPE)) {
                 case EMAIL_TYPE_SMS:
                     emailSubject = "New Message From " + (senderName == null ? senderNumber : senderName);
@@ -60,7 +63,7 @@ public class EmailIntentService extends IntentService {
                 GmailSender sender = new GmailSender(EMAIL_ADDRESS, PASSWORD);
                 sender.sendMail(emailSubject, emailBody, EMAIL_ADDRESS, EMAIL_ADDRESS);
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.d(TAG, e.getMessage());
                 sendSuccess = false;
             }
 

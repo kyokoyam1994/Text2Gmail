@@ -51,13 +51,7 @@ public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
                 ArrayList<SmsMessage> messageList = messageMap.get(address);
                 String message = concatSMSMessages(messageList);
                 long timestamp = messageList.get(0).getTimestampMillis();
-
-                Intent emailIntent = new Intent(context, EmailIntentService.class);
-                emailIntent.putExtra(EmailIntentService.EMAIL_TYPE, EmailIntentService.EMAIL_TYPE_SMS);
-                emailIntent.putExtra(EmailIntentService.SMS_SENDER_NUMBER, address);
-                emailIntent.putExtra(EmailIntentService.SMS_CONTENTS, message);
-                emailIntent.putExtra(EmailIntentService.SMS_DATE_RECEIVED, timestamp);
-                context.startService(emailIntent);
+                startEmailService(context, EmailIntentService.EMAIL_TYPE_SMS, address, message, timestamp);
             }
         } else if (intent.getAction().equals("android.intent.action.NEW_OUTGOING_CALL") && forwardMissedCalls) {
             savedNumber = intent.getExtras().getString("android.intent.extra.PHONE_NUMBER");
@@ -83,20 +77,16 @@ public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
         return result;
     }
 
-    protected void onIncomingCallStarted(Context ctx, String number, Date start){}
+    protected void onIncomingCallStarted(Context context, String number, Date start) {}
 
-    protected void onOutgoingCallStarted(Context ctx, String number, Date start){}
+    protected void onOutgoingCallStarted(Context context, String number, Date start) {}
 
-    protected void onIncomingCallEnded(Context ctx, String number, Date start, Date end){}
+    protected void onIncomingCallEnded(Context context, String number, Date start, Date end) {}
 
-    protected void onOutgoingCallEnded(Context ctx, String number, Date start, Date end){}
+    protected void onOutgoingCallEnded(Context context, String number, Date start, Date end) {}
 
-    protected void onMissedCall(Context ctx, String number, Date start){
-        Intent emailIntent = new Intent(ctx, EmailIntentService.class);
-        emailIntent.putExtra(EmailIntentService.EMAIL_TYPE, EmailIntentService.EMAIL_TYPE_MISSED_CALL);
-        emailIntent.putExtra(EmailIntentService.SMS_SENDER_NUMBER, number);
-        emailIntent.putExtra(EmailIntentService.SMS_DATE_RECEIVED, start.getTime());
-        ctx.startService(emailIntent);
+    protected void onMissedCall(Context context, String number, Date start) {
+        startEmailService(context, EmailIntentService.EMAIL_TYPE_MISSED_CALL, number, null, start.getTime());
     }
 
     public void onCallStateChanged(Context context, int state, String number) {
@@ -123,4 +113,14 @@ public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
         }
         lastState = state;
     }
+
+    private void startEmailService(Context context, String emailType, String senderNumber, String contents, long dateReceived){
+        Intent emailIntent = new Intent(context, EmailIntentService.class);
+        emailIntent.putExtra(EmailIntentService.EMAIL_TYPE, emailType);
+        emailIntent.putExtra(EmailIntentService.SMS_SENDER_NUMBER, senderNumber);
+        emailIntent.putExtra(EmailIntentService.SMS_CONTENTS, contents);
+        emailIntent.putExtra(EmailIntentService.SMS_DATE_RECEIVED, dateReceived);
+        context.startService(emailIntent);
+    }
+
 }

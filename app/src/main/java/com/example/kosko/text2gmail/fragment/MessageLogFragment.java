@@ -38,7 +38,6 @@ public class MessageLogFragment extends ListFragment implements View.OnClickList
         spinnerSortLog.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {refreshLog();}
-
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });

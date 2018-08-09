@@ -9,7 +9,6 @@ import android.provider.ContactsContract;
 public class Util {
 
     public static String findContactNameByNumber(Context context, String phoneNumber){
-        //Should check for permission here for contacts access
         String contactName = null;
         ContentResolver contentResolver = context.getContentResolver();
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));

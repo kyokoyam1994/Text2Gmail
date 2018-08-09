@@ -37,7 +37,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         NOT_CONFIGURED
     }
 
-    private static final int RC_SIGN_IN = 9001;
+    private static final int RC_SIGN_IN = 1001;
     private ServiceStatus serviceStatus = ServiceStatus.NOT_CONFIGURED;
 
     @Override

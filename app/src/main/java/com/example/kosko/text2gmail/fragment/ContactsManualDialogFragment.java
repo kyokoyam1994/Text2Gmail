@@ -1,7 +1,9 @@
 package com.example.kosko.text2gmail.fragment;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialogFragment;
@@ -11,9 +13,9 @@ import android.widget.EditText;
 
 import com.example.kosko.text2gmail.R;
 
-
 public class ContactsManualDialogFragment extends AppCompatDialogFragment {
 
+    public static final String BLOCKED_CONTACT_MANUAL_KEY = "BLOCKED_CONTACT_MANUAL_KEY";
     private EditText editTextEmailAddress;
 
     @Override
@@ -28,17 +30,16 @@ public class ContactsManualDialogFragment extends AppCompatDialogFragment {
             .setView(view)
             .setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
-
-                }
+                public void onClick(DialogInterface dialog, int which) {}
             })
             .setPositiveButton("OK", new DialogInterface.OnClickListener(){
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-
+                    Intent intent = new Intent();
+                    intent.putExtra(BLOCKED_CONTACT_MANUAL_KEY, editTextEmailAddress.getText().toString());
+                    getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, intent);
                 }
             });
-
         return builder.create();
     }
 
