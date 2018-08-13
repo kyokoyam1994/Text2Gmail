@@ -1,6 +1,9 @@
 package com.example.kosko.text2gmail.fragment;
 
+import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -21,12 +24,10 @@ import android.widget.TextView;
 import com.example.kosko.text2gmail.DailySchedulerActivity;
 import com.example.kosko.text2gmail.R;
 import com.example.kosko.text2gmail.receiver.SMSMissedCallBroadcastReceiver;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.Task;
+import com.example.kosko.text2gmail.util.Constants;
+import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
+
+import static android.app.Activity.RESULT_OK;
 
 public class EmailConfigFragment extends Fragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener{
 
@@ -37,7 +38,11 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         NOT_CONFIGURED
     }
 
-    private static final int RC_SIGN_IN = 1001;
+    private static final String TAG = EmailConfigFragment.class.getName();
+    private final String SCOPE = Constants.GMAIL_COMPOSE + " " + Constants.GMAIL_MODIFY + " " + Constants.MAIL_GOOGLE_COM;
+
+    private static final int AUTHORIZATION_CODE = 101;
+    private static final int ACCOUNT_CODE = 201;
     private ServiceStatus serviceStatus = ServiceStatus.NOT_CONFIGURED;
 
     @Override
@@ -64,13 +69,24 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == AUTHORIZATION_CODE) {
+                requestToken();
+            } else if (requestCode == ACCOUNT_CODE) {
+                String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                DefaultSharedPreferenceManager.setUserEmail(getActivity(), accountName);
 
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
+                // Invalidate old tokens which might be cached. We want a fresh one, which is guaranteed to work
+                invalidateToken();
+                requestToken();
+            }
+        }
+        /*// Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             // The Task returned from this call is always completed, no need to attach a listener.
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
-        }
+        }*/
     }
 
     @Override
@@ -100,7 +116,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
     }
 
     public void promptEmail(){
-        new Thread(new Runnable() {
+        /*new Thread(new Runnable() {
             @Override
             public void run() {
                 GoogleSignInOptions gso =  new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
@@ -108,10 +124,13 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
                 Intent signInIntent = mGoogleSignInClient.getSignInIntent();
                 startActivityForResult(signInIntent, RC_SIGN_IN);
             }
-        }).start();
+        }).start();*/
+
+        Intent intent = AccountManager.newChooseAccountIntent(null, null, new String[]{"com.google"}, null, null, null, null);
+        startActivityForResult(intent, ACCOUNT_CODE);
     }
 
-    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+    /*private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             System.out.println("Begin handle sign in");
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
@@ -123,7 +142,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
             e.printStackTrace();
         }
-    }
+    }*/
 
     public void toggleServiceStatus(boolean isChecked) {
         PackageManager packageManager = getActivity().getPackageManager();
@@ -137,12 +156,61 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
     private void updateStatusCircle(View view, boolean on){
         ImageView statusCircle = view.findViewById(R.id.statusCircle);
         TextView labelStatus = view.findViewById(R.id.labelStatus);
-        if (on){
+
+        if (DefaultSharedPreferenceManager.getUserEmail(getActivity()) == null || DefaultSharedPreferenceManager.getUserToken(getActivity()) == null) {
+            statusCircle.getDrawable().setColorFilter(ContextCompat.getColor(getActivity(), R.color.colorGray), PorterDuff.Mode.SRC);
+            labelStatus.setText(R.string.status_label_text_not_configured);
+        } else if (on) {
             statusCircle.getDrawable().setColorFilter(ContextCompat.getColor(getActivity(), R.color.colorGreen), PorterDuff.Mode.SRC);
             labelStatus.setText(R.string.status_label_text_running);
         } else {
             statusCircle.getDrawable().setColorFilter(ContextCompat.getColor(getActivity(), R.color.colorRed), PorterDuff.Mode.SRC);
             labelStatus.setText(R.string.status_label_text_stopped);
+        }
+    }
+
+    private void invalidateToken() {
+        AccountManager accountManager = AccountManager.get(getActivity());
+        accountManager.invalidateAuthToken("com.google", DefaultSharedPreferenceManager.getUserToken(getActivity()));
+        DefaultSharedPreferenceManager.setUserToken(getActivity(), null);
+    }
+
+    private void requestToken() {
+        Account userAccount = null;
+        AccountManager accountManager = AccountManager.get(getActivity());
+        String user = DefaultSharedPreferenceManager.getUserEmail(getActivity());
+        for (Account account : accountManager.getAccountsByType("com.google")) {
+            System.out.println(account.name + ":" + user);
+            if (account.name.equals(user)) {
+                userAccount = account;
+                break;
+            }
+        }
+        accountManager.getAuthToken(userAccount, "oauth2:" + SCOPE, null, getActivity(), new OnTokenAcquired(), null);
+    }
+
+    private class OnTokenAcquired implements AccountManagerCallback<Bundle> {
+        @Override
+        public void run(AccountManagerFuture<Bundle> result) {
+            try {
+                Bundle bundle = result.getResult();
+                Intent launch = (Intent) bundle.get(AccountManager.KEY_INTENT);
+                if (launch != null) {
+                    startActivityForResult(launch, AUTHORIZATION_CODE);
+                } else {
+                    String token = bundle.getString(AccountManager.KEY_AUTHTOKEN);
+                    System.out.println("TOKEN:" + token);
+                    DefaultSharedPreferenceManager.setUserToken(getActivity(), token);
+
+                    //Update UI
+                    PackageManager packageManager = getActivity().getPackageManager();
+                    ComponentName componentName = new ComponentName(getActivity(), SMSMissedCallBroadcastReceiver.class);
+                    int state = packageManager.getComponentEnabledSetting(componentName);
+                    updateStatusCircle(getView(), state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

@@ -1,9 +1,7 @@
 package com.example.kosko.text2gmail.fragment;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,11 +12,12 @@ import android.widget.CompoundButton;
 
 import com.example.kosko.text2gmail.ContactSelectionActivity;
 import com.example.kosko.text2gmail.R;
+import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 
 public class SettingsFragment extends Fragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
-    private static final int RC_CONTACT_MANUAL = 1001;
-    private static final int RC_CONTACT_FROM_BOOK = 2001;
+    private static final int RC_CONTACT_MANUAL = 101;
+    private static final int RC_CONTACT_FROM_BOOK = 201;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -27,8 +26,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
         Button buttonBlockContactsManual = view.findViewById(R.id.buttonBlockContactsManual);
         Button buttonBlockContactsFromBook = view.findViewById(R.id.buttonBlockContactsFromBook);
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        checkBoxMissedCalls.setChecked(preferences.getBoolean(getString(R.string.forward_missed_calls_key), true));
+        checkBoxMissedCalls.setChecked(DefaultSharedPreferenceManager.getForwardMissedCalls(getActivity()));
 
         checkBoxMissedCalls.setOnCheckedChangeListener(this);
         buttonBlockContactsManual.setOnClickListener(this);
@@ -79,10 +77,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
     }
 
     public void toggleForwardMissedCalls(boolean isChecked) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean(getString(R.string.forward_missed_calls_key), isChecked);
-        editor.commit();
+        DefaultSharedPreferenceManager.setForwardMissedCalls(getActivity(), isChecked);
     }
 
 }

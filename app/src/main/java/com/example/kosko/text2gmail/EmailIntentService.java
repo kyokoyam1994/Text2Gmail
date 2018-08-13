@@ -9,6 +9,7 @@ import android.util.Log;
 import com.example.kosko.text2gmail.database.AppDatabase;
 import com.example.kosko.text2gmail.database.entity.LogEntry;
 import com.example.kosko.text2gmail.fragment.MessageLogFragment;
+import com.example.kosko.text2gmail.util.Util;
 
 import java.util.Date;
 
@@ -63,7 +64,7 @@ public class EmailIntentService extends IntentService {
                 GmailSender sender = new GmailSender(EMAIL_ADDRESS, PASSWORD);
                 sender.sendMail(emailSubject, emailBody, EMAIL_ADDRESS, EMAIL_ADDRESS);
             } catch (Exception e) {
-                Log.d(TAG, e.getMessage());
+                Log.e(TAG, "Exception", e);
                 sendSuccess = false;
             }
 

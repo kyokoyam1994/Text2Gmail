@@ -1,4 +1,4 @@
-package com.example.kosko.text2gmail;
+package com.example.kosko.text2gmail.util;
 
 import android.content.ContentResolver;
 import android.content.Context;

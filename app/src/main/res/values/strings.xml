@@ -50,10 +50,6 @@
     <string name="email_fragment_dialog_invalid_address_text">Not a valid email address</string>
     <string name="email_fragment_dialog_not_gmail_text">Please enter a valid Gmail address</string>
 
-
-    //Shared Preference Keys
-    <string name="forward_missed_calls_key">FORWARD_MISSED_CALLS_KEY</string>
-
     //Misc Strings
     <string name="search">Search</string>
 </resources>

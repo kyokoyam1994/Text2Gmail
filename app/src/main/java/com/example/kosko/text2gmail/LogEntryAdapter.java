@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.example.kosko.text2gmail.database.entity.LogEntry;
+import com.example.kosko.text2gmail.util.Util;
 
 import java.util.HashMap;
 import java.util.List;

@@ -3,15 +3,14 @@ package com.example.kosko.text2gmail.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.kosko.text2gmail.EmailIntentService;
-import com.example.kosko.text2gmail.R;
+import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,6 +18,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
+
+    private static final String TAG = SMSMissedCallBroadcastReceiver.class.getName();
 
     private static int lastState = TelephonyManager.CALL_STATE_IDLE;
     private static Date callStartTime;
@@ -28,10 +29,13 @@ public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Bundle extras = intent.getExtras();
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean forwardMissedCalls = preferences.getBoolean(context.getString(R.string.forward_missed_calls_key), true);
+        String userEmail = DefaultSharedPreferenceManager.getUserEmail(context);
+        String token = DefaultSharedPreferenceManager.getUserToken(context);
+        boolean forwardMissedCalls = DefaultSharedPreferenceManager.getForwardMissedCalls(context);
 
-        if (intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED") && extras != null && extras.containsKey("pdus")) {
+        if (userEmail == null || token == null) {
+            Log.d(TAG, "Email is not configured!");
+        } else if (intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED") && extras != null && extras.containsKey("pdus")) {
             Toast.makeText(context,"Sending text...",  Toast.LENGTH_SHORT).show();
             Object[] pdus = (Object[]) extras.get("pdus");
             HashMap<String, ArrayList<SmsMessage>> messageMap = new HashMap<>();
@@ -66,15 +70,6 @@ public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
 
             onCallStateChanged(context, state, number);
         }
-    }
-
-    //Method operates on the assumption that all messages in the list come from the same sender
-    private String concatSMSMessages(ArrayList<SmsMessage> messageList){
-        String result = "";
-        for (SmsMessage message : messageList) {
-            result += message.getMessageBody();
-        }
-        return result;
     }
 
     protected void onIncomingCallStarted(Context context, String number, Date start) {}
@@ -112,6 +107,15 @@ public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
                 break;
         }
         lastState = state;
+    }
+
+    //Method operates on the assumption that all messages in the list come from the same sender
+    private String concatSMSMessages(ArrayList<SmsMessage> messageList){
+        String result = "";
+        for (SmsMessage message : messageList) {
+            result += message.getMessageBody();
+        }
+        return result;
     }
 
     private void startEmailService(Context context, String emailType, String senderNumber, String contents, long dateReceived){
