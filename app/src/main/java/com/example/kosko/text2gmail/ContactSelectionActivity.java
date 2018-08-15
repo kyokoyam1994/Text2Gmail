@@ -9,6 +9,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.widget.ListView;
 
+import com.example.kosko.text2gmail.adapter.ContactSelectionAdapter;
+
 public class ContactSelectionActivity extends AppCompatActivity{
 
     private ListView listViewContacts;

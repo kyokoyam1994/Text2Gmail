@@ -1,4 +1,4 @@
-package com.example.kosko.text2gmail;
+package com.example.kosko.text2gmail.adapter;
 
 import android.content.Context;
 import android.database.Cursor;

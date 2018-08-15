@@ -1,4 +1,4 @@
-package com.example.kosko.text2gmail;
+package com.example.kosko.text2gmail.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.example.kosko.text2gmail.R;
 import com.example.kosko.text2gmail.database.entity.LogEntry;
 import com.example.kosko.text2gmail.util.Util;
 

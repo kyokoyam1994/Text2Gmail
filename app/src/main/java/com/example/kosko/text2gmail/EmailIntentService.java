@@ -18,9 +18,6 @@ public class EmailIntentService extends IntentService {
 
     private static final String TAG = EmailIntentService.class.getName();
 
-    private final static String EMAIL_ADDRESS = "koskosyokoyama@gmail.com";
-    private final static String PASSWORD = "password1234";
-
     public static final String EMAIL_TYPE = "EMAIL_TYPE";
     public static final String EMAIL_TYPE_SMS = "SMS";
     public static final String EMAIL_TYPE_MISSED_CALL = "MISSED_CALL";

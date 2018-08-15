@@ -1,10 +1,14 @@
 package com.example.kosko.text2gmail.util;
 
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
+
+import com.example.kosko.text2gmail.receiver.SMSMissedCallBroadcastReceiver;
 
 public class Util {
 
@@ -18,6 +22,13 @@ public class Util {
             cursor.close();
         }
         return contactName;
+    }
+
+    public static boolean isSMSMissedCallBroadcastReceiverOn(Context context){
+        PackageManager packageManager = context.getPackageManager();
+        ComponentName componentName = new ComponentName(context, SMSMissedCallBroadcastReceiver.class);
+        int state = packageManager.getComponentEnabledSetting(componentName);
+        return state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
     }
 
 }

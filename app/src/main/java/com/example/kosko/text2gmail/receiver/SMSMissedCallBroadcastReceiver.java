@@ -36,7 +36,7 @@ public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
         if (userEmail == null || token == null) {
             Log.d(TAG, "Email is not configured!");
         } else if (intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED") && extras != null && extras.containsKey("pdus")) {
-            Toast.makeText(context,"Sending text...",  Toast.LENGTH_SHORT).show();
+            Toast.makeText(context,"Sending SMS Email...",  Toast.LENGTH_SHORT).show();
             Object[] pdus = (Object[]) extras.get("pdus");
             HashMap<String, ArrayList<SmsMessage>> messageMap = new HashMap<>();
             for (Object pdu : pdus) {
@@ -111,11 +111,9 @@ public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
 
     //Method operates on the assumption that all messages in the list come from the same sender
     private String concatSMSMessages(ArrayList<SmsMessage> messageList){
-        String result = "";
-        for (SmsMessage message : messageList) {
-            result += message.getMessageBody();
-        }
-        return result;
+        StringBuilder builder = new StringBuilder();
+        for (SmsMessage message : messageList) builder.append(message.getMessageBody());
+        return builder.toString();
     }
 
     private void startEmailService(Context context, String emailType, String senderNumber, String contents, long dateReceived){

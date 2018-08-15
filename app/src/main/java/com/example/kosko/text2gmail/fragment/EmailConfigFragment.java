@@ -11,33 +11,28 @@ import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.ViewSwitcher;
 
 import com.example.kosko.text2gmail.DailySchedulerActivity;
 import com.example.kosko.text2gmail.R;
 import com.example.kosko.text2gmail.receiver.SMSMissedCallBroadcastReceiver;
 import com.example.kosko.text2gmail.util.Constants;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
+import com.example.kosko.text2gmail.util.Util;
 
 import static android.app.Activity.RESULT_OK;
 
-public class EmailConfigFragment extends Fragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener{
-
-    public enum ServiceStatus {
-        RUNNING,
-        STOPPED,
-        NOT_SCHEDULED,
-        NOT_CONFIGURED
-    }
-
-    private ServiceStatus serviceStatus = ServiceStatus.NOT_CONFIGURED;
+public class EmailConfigFragment extends Fragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
     private static final String TAG = EmailConfigFragment.class.getName();
     private final String SCOPE = Constants.GMAIL_COMPOSE + " " + Constants.GMAIL_MODIFY + " " + Constants.MAIL_GOOGLE_COM;
@@ -52,16 +47,17 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         Button setScheduleButton = view.findViewById(R.id.setScheduleButton);
         Switch switchServiceStatus = view.findViewById(R.id.switchServiceStatus);
         Button configureEmailButton = view.findViewById(R.id.configureEmailButton);
+        ImageButton buttonDeleteConfiguredEmailAddress = view.findViewById(R.id.buttonDeleteConfiguredEmailAddress);
 
-        PackageManager packageManager = getActivity().getPackageManager();
-        ComponentName componentName = new ComponentName(getActivity(), SMSMissedCallBroadcastReceiver.class);
-        int state = packageManager.getComponentEnabledSetting(componentName);
-        switchServiceStatus.setChecked(state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
-        updateStatusCircle(view, state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
+        boolean isReceiverOn = Util.isSMSMissedCallBroadcastReceiverOn(getActivity());
+        switchServiceStatus.setChecked(isReceiverOn);
+        updateConfiguredEmail(view);
+        updateStatusCircle(view, isReceiverOn);
 
         setScheduleButton.setOnClickListener(this);
         switchServiceStatus.setOnCheckedChangeListener(this);
         configureEmailButton.setOnClickListener(this);
+        buttonDeleteConfiguredEmailAddress.setOnClickListener(this);
 
         return view;
     }
@@ -75,8 +71,6 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
             } else if (requestCode == ACCOUNT_CODE) {
                 String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
                 DefaultSharedPreferenceManager.setUserEmail(getActivity(), accountName);
-
-                // Invalidate old tokens which might be cached. We want a fresh one, which is guaranteed to work
                 invalidateToken();
                 requestToken();
             }
@@ -91,6 +85,9 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
                 break;
             case R.id.configureEmailButton:
                 promptEmail();
+                break;
+            case R.id.buttonDeleteConfiguredEmailAddress:
+                deleteConfiguredEmail(getView());
                 break;
         }
     }
@@ -109,9 +106,31 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         startActivity(intent);
     }
 
-    public void promptEmail(){
+    public void promptEmail() {
         Intent intent = AccountManager.newChooseAccountIntent(null, null, new String[]{"com.google"}, null, null, null, null);
         startActivityForResult(intent, ACCOUNT_CODE);
+    }
+
+    public void updateConfiguredEmail(View view) {
+        if (DefaultSharedPreferenceManager.getUserEmail(getActivity()) != null && DefaultSharedPreferenceManager.getUserToken(getActivity()) != null) {
+            TextView labelConfiguredEmailAddress = view.findViewById(R.id.labelConfiguredEmailAddress);
+            ViewSwitcher viewSwitcher = view.findViewById(R.id.viewSwitcher);
+            labelConfiguredEmailAddress.setText(DefaultSharedPreferenceManager.getUserEmail(getActivity()));
+            if (viewSwitcher.getCurrentView() == view.findViewById(R.id.labelEmailUnconfigured)) {
+                viewSwitcher.showNext();
+            }
+        }
+    }
+
+    public void deleteConfiguredEmail(View view) {
+        DefaultSharedPreferenceManager.setUserEmail(getActivity(), null);
+        DefaultSharedPreferenceManager.setUserToken(getActivity(), null);
+        updateStatusCircle(view, Util.isSMSMissedCallBroadcastReceiverOn(getActivity()));
+
+        ViewSwitcher viewSwitcher = view.findViewById(R.id.viewSwitcher);
+        if(viewSwitcher.getCurrentView() == view.findViewById(R.id.cardViewConfiguredEmailAddress)){
+            viewSwitcher.showNext();
+        }
     }
 
     public void toggleServiceStatus(boolean isChecked) {
@@ -123,7 +142,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         updateStatusCircle(getView(), isChecked);
     }
 
-    private void updateStatusCircle(View view, boolean on){
+    private void updateStatusCircle(View view, boolean on) {
         ImageView statusCircle = view.findViewById(R.id.statusCircle);
         TextView labelStatus = view.findViewById(R.id.labelStatus);
 
@@ -150,7 +169,6 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         AccountManager accountManager = AccountManager.get(getActivity());
         String user = DefaultSharedPreferenceManager.getUserEmail(getActivity());
         for (Account account : accountManager.getAccountsByType("com.google")) {
-            System.out.println(account.name + ":" + user);
             if (account.name.equals(user)) {
                 userAccount = account;
                 break;
@@ -169,19 +187,13 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
                     startActivityForResult(launch, AUTHORIZATION_CODE);
                 } else {
                     String token = bundle.getString(AccountManager.KEY_AUTHTOKEN);
-                    System.out.println("TOKEN:" + token);
                     DefaultSharedPreferenceManager.setUserToken(getActivity(), token);
-
-                    //Update UI
-                    PackageManager packageManager = getActivity().getPackageManager();
-                    ComponentName componentName = new ComponentName(getActivity(), SMSMissedCallBroadcastReceiver.class);
-                    int state = packageManager.getComponentEnabledSetting(componentName);
-                    updateStatusCircle(getView(), state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
+                    updateConfiguredEmail(getView());
+                    updateStatusCircle(getView(), Util.isSMSMissedCallBroadcastReceiverOn(getActivity()));
                 }
             } catch (Exception e) {
-                DefaultSharedPreferenceManager.setUserEmail(getActivity(), null);
-                DefaultSharedPreferenceManager.setUserToken(getActivity(), null);
-                throw new RuntimeException(e);
+                Log.e(TAG, "Exception", e);
+                deleteConfiguredEmail(getView());
             }
         }
     }

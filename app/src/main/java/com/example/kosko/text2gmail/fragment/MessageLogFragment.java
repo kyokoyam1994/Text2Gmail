@@ -15,7 +15,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.Spinner;
 
-import com.example.kosko.text2gmail.LogEntryAdapter;
+import com.example.kosko.text2gmail.adapter.LogEntryAdapter;
 import com.example.kosko.text2gmail.R;
 import com.example.kosko.text2gmail.database.AppDatabase;
 import com.example.kosko.text2gmail.database.entity.LogEntry;
@@ -37,7 +37,7 @@ public class MessageLogFragment extends ListFragment implements View.OnClickList
         spinnerSortLog = view.findViewById(R.id.spinnerSortLog);
         spinnerSortLog.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {refreshLog();}
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) { refreshLog(); }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });
