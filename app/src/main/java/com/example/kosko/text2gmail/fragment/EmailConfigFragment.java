@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -38,12 +37,13 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         NOT_CONFIGURED
     }
 
+    private ServiceStatus serviceStatus = ServiceStatus.NOT_CONFIGURED;
+
     private static final String TAG = EmailConfigFragment.class.getName();
     private final String SCOPE = Constants.GMAIL_COMPOSE + " " + Constants.GMAIL_MODIFY + " " + Constants.MAIL_GOOGLE_COM;
 
     private static final int AUTHORIZATION_CODE = 101;
     private static final int ACCOUNT_CODE = 201;
-    private ServiceStatus serviceStatus = ServiceStatus.NOT_CONFIGURED;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -51,7 +51,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
 
         Button setScheduleButton = view.findViewById(R.id.setScheduleButton);
         Switch switchServiceStatus = view.findViewById(R.id.switchServiceStatus);
-        ImageButton addEmailButton = view.findViewById(R.id.addEmailButton);
+        Button configureEmailButton = view.findViewById(R.id.configureEmailButton);
 
         PackageManager packageManager = getActivity().getPackageManager();
         ComponentName componentName = new ComponentName(getActivity(), SMSMissedCallBroadcastReceiver.class);
@@ -61,7 +61,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
 
         setScheduleButton.setOnClickListener(this);
         switchServiceStatus.setOnCheckedChangeListener(this);
-        addEmailButton.setOnClickListener(this);
+        configureEmailButton.setOnClickListener(this);
 
         return view;
     }
@@ -81,12 +81,6 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
                 requestToken();
             }
         }
-        /*// Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
-            // The Task returned from this call is always completed, no need to attach a listener.
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            handleSignInResult(task);
-        }*/
     }
 
     @Override
@@ -95,7 +89,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
             case R.id.setScheduleButton:
                 configureSchedule();
                 break;
-            case R.id.addEmailButton:
+            case R.id.configureEmailButton:
                 promptEmail();
                 break;
         }
@@ -116,33 +110,9 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
     }
 
     public void promptEmail(){
-        /*new Thread(new Runnable() {
-            @Override
-            public void run() {
-                GoogleSignInOptions gso =  new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
-                GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(getActivity(), gso);
-                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-                startActivityForResult(signInIntent, RC_SIGN_IN);
-            }
-        }).start();*/
-
         Intent intent = AccountManager.newChooseAccountIntent(null, null, new String[]{"com.google"}, null, null, null, null);
         startActivityForResult(intent, ACCOUNT_CODE);
     }
-
-    /*private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
-        try {
-            System.out.println("Begin handle sign in");
-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            AccountManager accountManager = AccountManager.get(getActivity());
-            accountManager.getAuthToken(account.getAccount(), "android", null, true, null, null);
-            System.out.println("End handle sign in");
-        } catch (ApiException e) {
-            // The ApiException status code indicates the detailed failure reason.
-            // Please refer to the GoogleSignInStatusCodes class reference for more information.
-            e.printStackTrace();
-        }
-    }*/
 
     public void toggleServiceStatus(boolean isChecked) {
         PackageManager packageManager = getActivity().getPackageManager();
@@ -209,6 +179,8 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
                     updateStatusCircle(getView(), state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
                 }
             } catch (Exception e) {
+                DefaultSharedPreferenceManager.setUserEmail(getActivity(), null);
+                DefaultSharedPreferenceManager.setUserToken(getActivity(), null);
                 throw new RuntimeException(e);
             }
         }

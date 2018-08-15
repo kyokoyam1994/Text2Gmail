@@ -14,6 +14,8 @@
     <string name="scheduling_mode_status_text">Scheduling Mode</string>
     <string name="set_schedule_button_text">Set Schedule</string>
     <string name="email_configuration_text">Email Configuration</string>
+    <string name="configure_email_button_text">Configure Email</string>
+    <string name="label_unconfigured_email_text">There are currently no e-mails configured yet.</string>
 
     //Daily Scheduler Strings
     <string name="start_time_label_text">Start Time</string>>

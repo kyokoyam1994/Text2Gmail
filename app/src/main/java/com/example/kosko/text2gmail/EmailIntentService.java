@@ -9,6 +9,7 @@ import android.util.Log;
 import com.example.kosko.text2gmail.database.AppDatabase;
 import com.example.kosko.text2gmail.database.entity.LogEntry;
 import com.example.kosko.text2gmail.fragment.MessageLogFragment;
+import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 import com.example.kosko.text2gmail.util.Util;
 
 import java.util.Date;
@@ -48,7 +49,7 @@ public class EmailIntentService extends IntentService {
             String emailBody;
             switch (intent.getStringExtra(EMAIL_TYPE)) {
                 case EMAIL_TYPE_SMS:
-                    emailSubject = "New Message From " + (senderName == null ? senderNumber : senderName);
+                    emailSubject = "New SMS Received From " + (senderName == null ? senderNumber : senderName);
                     emailBody = smsContents;
                     break;
                 case EMAIL_TYPE_MISSED_CALL:
@@ -61,8 +62,9 @@ public class EmailIntentService extends IntentService {
 
             boolean sendSuccess = true;
             try {
-                GmailSender sender = new GmailSender(EMAIL_ADDRESS, PASSWORD);
-                sender.sendMail(emailSubject, emailBody, EMAIL_ADDRESS, EMAIL_ADDRESS);
+                GMailSender sender = new GMailSender();
+                sender.sendMail(emailSubject, emailBody, DefaultSharedPreferenceManager.getUserEmail(this),
+                        DefaultSharedPreferenceManager.getUserToken(this), DefaultSharedPreferenceManager.getUserEmail(this));
             } catch (Exception e) {
                 Log.e(TAG, "Exception", e);
                 sendSuccess = false;
