@@ -6,9 +6,10 @@ import android.widget.ArrayAdapter;
 
 import java.util.List;
 
-public class ScheduleListAdapter extends ArrayAdapter {
+public class ScheduleEntryAdapter extends ArrayAdapter {
 
-    public ScheduleListAdapter(@NonNull Context context, int resource, @NonNull List objects) {
+    public ScheduleEntryAdapter(@NonNull Context context, int resource, @NonNull List objects) {
         super(context, resource, objects);
     }
+
 }

@@ -21,7 +21,7 @@ public class DefaultSharedPreferenceManager {
     public static final String SATURDAY_SCHEDULE_KEY = "SATURDAY_SCHEDULE_KEY";
     public static final String SUNDAY_SCHEDULE_KEY = "SUNDAY_SCHEDULE_KEY";
 
-    private static final String[] DAY_OF_THE_WEEK_KEYS = {MONDAY_SCHEDULE_KEY, TUESDAY_SCHEDULE_KEY,
+    public static final String[] DAY_OF_THE_WEEK_KEYS = {MONDAY_SCHEDULE_KEY, TUESDAY_SCHEDULE_KEY,
                                 WEDNESDAY_SCHEDULE_KEY, THURSDAY_SCHEDULE_KEY, FRIDAY_SCHEDULE_KEY,
                                 SATURDAY_SCHEDULE_KEY, SUNDAY_SCHEDULE_KEY};
 

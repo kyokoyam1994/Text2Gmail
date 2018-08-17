@@ -19,7 +19,9 @@ import com.example.kosko.text2gmail.adapter.LogEntryAdapter;
 import com.example.kosko.text2gmail.R;
 import com.example.kosko.text2gmail.database.AppDatabase;
 import com.example.kosko.text2gmail.database.entity.LogEntry;
+import com.example.kosko.text2gmail.util.Util;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class MessageLogFragment extends ListFragment implements View.OnClickListener{
@@ -79,17 +81,28 @@ public class MessageLogFragment extends ListFragment implements View.OnClickList
 
     private class LogEntryTask extends AsyncTask<String, Void, List<LogEntry>> {
         private String sortOption = spinnerSortLog.getSelectedItem().toString();
+        private HashMap<String, String> contactNameMap = new HashMap<>();
 
         @Override
         protected List<LogEntry> doInBackground(String... strings) {
-            if(strings.length > 0 && CLEAR_OPERATION.equals(strings[0])) AppDatabase.getInstance(getActivity()).logEntryDao().deleteAll();
-            if(sortOption.equals(getString(R.string.sender))) return AppDatabase.getInstance(getActivity()).logEntryDao().getAllBySender();
-            else return AppDatabase.getInstance(getActivity()).logEntryDao().getAllByTimestamp();
+            if(strings.length > 0 && CLEAR_OPERATION.equals(strings[0])) {
+                AppDatabase.getInstance(getActivity()).logEntryDao().deleteAll();
+            }
+
+            List<LogEntry> entries;
+            if (sortOption.equals(getString(R.string.sender))) {
+                entries = AppDatabase.getInstance(getActivity()).logEntryDao().getAllBySender();
+            } else {
+                entries = AppDatabase.getInstance(getActivity()).logEntryDao().getAllByTimestamp();
+            }
+
+            for (LogEntry entry : entries) contactNameMap.put(entry.getSenderNumber(), Util.findContactNameByNumber(getActivity(), entry.getSenderNumber()));
+            return entries;
         }
 
         @Override
         protected void onPostExecute(List<LogEntry> logEntries) {
-            LogEntryAdapter adapter = new LogEntryAdapter(getActivity(), R.layout.log_entry, logEntries);
+            LogEntryAdapter adapter = new LogEntryAdapter(getActivity(), R.layout.log_entry, logEntries, contactNameMap);
             setListAdapter(adapter);
         }
     }

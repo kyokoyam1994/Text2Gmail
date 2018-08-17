@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import com.example.kosko.text2gmail.R;
 import com.example.kosko.text2gmail.database.entity.LogEntry;
-import com.example.kosko.text2gmail.util.Util;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,8 +19,9 @@ public class LogEntryAdapter extends ArrayAdapter<LogEntry> {
 
     private HashMap<String, String> contactNameMap;
 
-    public LogEntryAdapter(@NonNull Context context, int resource, @NonNull List<LogEntry> objects) {
-        super(context, resource, objects);
+    public LogEntryAdapter(@NonNull Context context, int resource, @NonNull List<LogEntry> entries, HashMap<String, String> contactNameMap) {
+        super(context, resource, entries);
+        this.contactNameMap = contactNameMap;
     }
 
     @NonNull
@@ -38,8 +38,7 @@ public class LogEntryAdapter extends ArrayAdapter<LogEntry> {
         TextView date = v.findViewById(R.id.logEntryDateTextView);
         TextView sendSuccessful = v.findViewById(R.id.logEntrySendSuccessful);
 
-        //Find a way to move this method outside of the main thread when calling from getView()
-        String contactName = Util.findContactNameByNumber(getContext(), entry.getSenderNumber());
+        String contactName = contactNameMap.get(entry.getSenderNumber());
         sender.setText(contactName == null ? entry.getSenderNumber() : contactName);
         message.setText(entry.getMessage());
         date.setText(entry.getDateReceived().toString());
