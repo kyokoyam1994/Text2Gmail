@@ -7,8 +7,16 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import android.util.Log;
 
+import com.example.kosko.text2gmail.database.entity.LogEntry;
 import com.example.kosko.text2gmail.receiver.SMSMissedCallBroadcastReceiver;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.TreeMap;
 
 public class Util {
 
@@ -29,6 +37,28 @@ public class Util {
         ComponentName componentName = new ComponentName(context, SMSMissedCallBroadcastReceiver.class);
         int state = packageManager.getComponentEnabledSetting(componentName);
         return state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+    }
+
+
+    public static List<LogEntry> sortLogEntriesByContactName(Context context, List<LogEntry> logEntries){
+        TreeMap<String, ArrayList<LogEntry>> contactEntryMap = new TreeMap<>();
+        for (LogEntry entry : logEntries) {
+            String temp = Util.findContactNameByNumber(context, entry.getSenderNumber());
+            String contactName = (temp == null ? entry.getSenderNumber() : temp);
+
+            ArrayList<LogEntry> entryList;
+            if(contactEntryMap.containsKey(contactName)) entryList = contactEntryMap.get(contactName);
+            else entryList = new ArrayList<>();
+            entryList.add(entry);
+            contactEntryMap.put(contactName, entryList);
+        }
+
+        ArrayList<LogEntry> newLogEntries = new ArrayList<>();
+        Iterator iterator = contactEntryMap.keySet().iterator();
+        while (iterator.hasNext()){
+            newLogEntries.addAll(contactEntryMap.get(iterator.next()));
+        }
+        return newLogEntries;
     }
 
 }

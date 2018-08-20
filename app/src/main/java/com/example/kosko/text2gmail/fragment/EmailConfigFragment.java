@@ -63,6 +63,29 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
     }
 
     @Override
+    public void onResume() {
+        //Perform check here to see whether Google account still exists on device
+        super.onResume();
+        String user = DefaultSharedPreferenceManager.getUserEmail(getActivity());
+        String token = DefaultSharedPreferenceManager.getUserToken(getActivity());
+        if (user != null && token != null) {
+            Account userAccount = null;
+            AccountManager accountManager = AccountManager.get(getActivity());
+            for (Account account : accountManager.getAccountsByType("com.google")) {
+                if (account.name.equals(user)) {
+                    userAccount = account;
+                    break;
+                }
+            }
+
+            if(userAccount == null) {
+                Log.d(TAG, "Account no longer exists, removing...");
+                deleteConfiguredEmail(getView());
+            }
+        }
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {

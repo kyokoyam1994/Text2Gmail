@@ -17,7 +17,7 @@ public interface LogEntryDao {
     @Query("SELECT * FROM LogEntry ORDER BY dateReceived DESC")
     List<LogEntry> getAllByTimestamp();
 
-    @Query("SELECT * FROM LogEntry ORDER BY senderNumber")
+    @Query("SELECT * FROM LogEntry ORDER BY senderNumber DESC, dateReceived DESC")
     List<LogEntry> getAllBySender();
 
     @Insert

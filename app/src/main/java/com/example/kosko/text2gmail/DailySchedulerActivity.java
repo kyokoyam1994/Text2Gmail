@@ -35,6 +35,7 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
         buttonOK.setOnClickListener(this);
         editTextStartTime.setOnFocusChangeListener(this);
         editTextEndTime.setOnFocusChangeListener(this);
+        refreshSchedule();
     }
 
     @Override
@@ -67,15 +68,15 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
 
 
     private void refreshSchedule() {
-        //ListView listViewSchedule = findViewById(R.id.listViewSchedule);
+        ListView listViewSchedule = findViewById(R.id.listViewSchedule);
         ArrayList<ScheduleEntry> entries = new ArrayList<>();
         for (int i = 0; i < DefaultSharedPreferenceManager.DAY_OF_THE_WEEK_KEYS.length; i++) {
             String schedule = DefaultSharedPreferenceManager.getSchedule(this, DefaultSharedPreferenceManager.DAY_OF_THE_WEEK_KEYS[i]);
             String[] intervals = schedule.split("~");
             entries.add(new ScheduleEntry(DayOfWeek.of(i+1), intervals[0], intervals[1]));
         }
-        //ScheduleEntryAdapter scheduleEntryAdapter = new ScheduleEntryAdapter(this, R.layout.schedule_list_item, entries);
-        //listViewSchedule.setAdapter(scheduleEntryAdapter);
+        ScheduleEntryAdapter scheduleEntryAdapter = new ScheduleEntryAdapter(this, R.layout.schedule_list_item, entries);
+        listViewSchedule.setAdapter(scheduleEntryAdapter);
     }
 
     private void applySelection(){
@@ -86,6 +87,7 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
         //findViewById(R.id.checkBoxFri).isSelected();
         //findViewById(R.id.checkBoxSat).isSelected();
         //findViewById(R.id.checkBoxSun).isSelected();
+        refreshSchedule();
     }
 
 }

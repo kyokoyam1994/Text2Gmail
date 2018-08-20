@@ -91,7 +91,7 @@ public class MessageLogFragment extends ListFragment implements View.OnClickList
 
             List<LogEntry> entries;
             if (sortOption.equals(getString(R.string.sender))) {
-                entries = AppDatabase.getInstance(getActivity()).logEntryDao().getAllBySender();
+                entries = Util.sortLogEntriesByContactName(getActivity(), AppDatabase.getInstance(getActivity()).logEntryDao().getAllBySender());
             } else {
                 entries = AppDatabase.getInstance(getActivity()).logEntryDao().getAllByTimestamp();
             }
