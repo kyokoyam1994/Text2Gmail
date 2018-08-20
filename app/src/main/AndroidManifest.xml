@@ -56,6 +56,14 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".receiver.SchedulingModeBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

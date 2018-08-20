@@ -11,6 +11,7 @@ public class DefaultSharedPreferenceManager {
     // Properties
     private static final String USER_EMAIL_KEY = "USER_EMAIL_KEY";
     private static final String USER_TOKEN_KEY = "USER_TOKEN_KEY";
+    private static final String SCHEDULING_MODE_KEY = "SCHEDULING_MODE_KEY";
     private static final String FORWARD_MISSED_CALLS_KEY = "FORWARD_MISSED_CALLS_KEY";
 
     public static final String MONDAY_SCHEDULE_KEY = "MONDAY_SCHEDULE_KEY";
@@ -52,6 +53,16 @@ public class DefaultSharedPreferenceManager {
     public static void setForwardMissedCalls (Context context, boolean newValue) {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         editor.putBoolean(FORWARD_MISSED_CALLS_KEY, newValue);
+        editor.commit();
+    }
+
+    public static boolean getSchedulingMode (Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(SCHEDULING_MODE_KEY, false);
+    }
+
+    public static void setSchedulingMode (Context context, boolean newValue) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putBoolean(SCHEDULING_MODE_KEY, newValue);
         editor.commit();
     }
 

@@ -25,6 +25,7 @@ import android.widget.ViewSwitcher;
 
 import com.example.kosko.text2gmail.DailySchedulerActivity;
 import com.example.kosko.text2gmail.R;
+import com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver;
 import com.example.kosko.text2gmail.receiver.SMSMissedCallBroadcastReceiver;
 import com.example.kosko.text2gmail.util.Constants;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
@@ -46,16 +47,19 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
 
         Button setScheduleButton = view.findViewById(R.id.setScheduleButton);
         Switch switchServiceStatus = view.findViewById(R.id.switchServiceStatus);
+        Switch switchSchedulingMode = view.findViewById(R.id.switchSchedulingMode);
         Button configureEmailButton = view.findViewById(R.id.configureEmailButton);
         ImageButton buttonDeleteConfiguredEmailAddress = view.findViewById(R.id.buttonDeleteConfiguredEmailAddress);
 
         boolean isReceiverOn = Util.isSMSMissedCallBroadcastReceiverOn(getActivity());
         switchServiceStatus.setChecked(isReceiverOn);
+        switchSchedulingMode.setChecked(DefaultSharedPreferenceManager.getSchedulingMode(getActivity()));
         updateConfiguredEmail(view);
         updateStatusCircle(view, isReceiverOn);
 
         setScheduleButton.setOnClickListener(this);
         switchServiceStatus.setOnCheckedChangeListener(this);
+        switchSchedulingMode.setOnCheckedChangeListener(this);
         configureEmailButton.setOnClickListener(this);
         buttonDeleteConfiguredEmailAddress.setOnClickListener(this);
 
@@ -64,7 +68,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
 
     @Override
     public void onResume() {
-        //Perform check here to see whether Google account still exists on device
+        //Perform check here to see whether Google account still exists on device, remove it from configured email if not
         super.onResume();
         String user = DefaultSharedPreferenceManager.getUserEmail(getActivity());
         String token = DefaultSharedPreferenceManager.getUserToken(getActivity());
@@ -121,6 +125,9 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
             case R.id.switchServiceStatus:
                 toggleServiceStatus(isChecked);
                 break;
+            case R.id.switchSchedulingMode:
+                toggleSchedulingMode(isChecked);
+                break;
         }
     }
 
@@ -165,16 +172,31 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         updateStatusCircle(getView(), isChecked);
     }
 
-    private void updateStatusCircle(View view, boolean on) {
+    public void toggleSchedulingMode(boolean isChecked) {
+        DefaultSharedPreferenceManager.setSchedulingMode(getActivity(), isChecked);
+        Switch switchServiceStatus = getView().findViewById(R.id.switchServiceStatus);
+
+        //Potentially leaking activity here! Find some other context to pass
+        if(isChecked) SchedulingModeBroadcastReceiver.startAlarm(getActivity());
+        else SchedulingModeBroadcastReceiver.cancelAlarm(getActivity());
+        updateStatusCircle(getView(), switchServiceStatus.isChecked());
+    }
+
+    private void updateStatusCircle(View view, boolean serviceOn) {
         ImageView statusCircle = view.findViewById(R.id.statusCircle);
         TextView labelStatus = view.findViewById(R.id.labelStatus);
 
         if (DefaultSharedPreferenceManager.getUserEmail(getActivity()) == null || DefaultSharedPreferenceManager.getUserToken(getActivity()) == null) {
             statusCircle.getDrawable().setColorFilter(ContextCompat.getColor(getActivity(), R.color.colorGray), PorterDuff.Mode.SRC);
             labelStatus.setText(R.string.status_label_text_not_configured);
-        } else if (on) {
-            statusCircle.getDrawable().setColorFilter(ContextCompat.getColor(getActivity(), R.color.colorGreen), PorterDuff.Mode.SRC);
-            labelStatus.setText(R.string.status_label_text_running);
+        } else if (serviceOn) {
+            if (DefaultSharedPreferenceManager.getSchedulingMode(getActivity())){
+                statusCircle.getDrawable().setColorFilter(ContextCompat.getColor(getActivity(), R.color.colorYellow), PorterDuff.Mode.SRC);
+                labelStatus.setText(R.string.status_label_text_not_scheduled);
+            } else {
+                statusCircle.getDrawable().setColorFilter(ContextCompat.getColor(getActivity(), R.color.colorGreen), PorterDuff.Mode.SRC);
+                labelStatus.setText(R.string.status_label_text_running);
+            }
         } else {
             statusCircle.getDrawable().setColorFilter(ContextCompat.getColor(getActivity(), R.color.colorRed), PorterDuff.Mode.SRC);
             labelStatus.setText(R.string.status_label_text_stopped);
