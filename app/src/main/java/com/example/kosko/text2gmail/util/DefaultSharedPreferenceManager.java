@@ -12,6 +12,7 @@ public class DefaultSharedPreferenceManager {
     private static final String USER_EMAIL_KEY = "USER_EMAIL_KEY";
     private static final String USER_TOKEN_KEY = "USER_TOKEN_KEY";
     private static final String SCHEDULING_MODE_KEY = "SCHEDULING_MODE_KEY";
+    private static final String CURRENTLY_SCHEDULED_KEY = "CURRENTLY_SCHEDULED_KEY";
     private static final String FORWARD_MISSED_CALLS_KEY = "FORWARD_MISSED_CALLS_KEY";
 
     public static final String MONDAY_SCHEDULE_KEY = "MONDAY_SCHEDULE_KEY";
@@ -66,17 +67,27 @@ public class DefaultSharedPreferenceManager {
         editor.commit();
     }
 
+    public static boolean getCurrentlyScheduled (Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(CURRENTLY_SCHEDULED_KEY, false);
+    }
+
+    public static void setCurrentlyScheduled (Context context, boolean newValue) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putBoolean(CURRENTLY_SCHEDULED_KEY, newValue);
+        editor.commit();
+    }
+
+    public static String getSchedule (Context context, String dayOfWeek) {
+        if (ArrayUtils.contains(DAY_OF_THE_WEEK_KEYS, dayOfWeek)) return PreferenceManager.getDefaultSharedPreferences(context).getString(dayOfWeek, "9:00~17:00");
+        return null;
+    }
+
     public static void setSchedule(Context context, String dayOfWeek, String newValue) {
         if (ArrayUtils.contains(DAY_OF_THE_WEEK_KEYS, dayOfWeek)) {
             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
             editor.putString(dayOfWeek, newValue);
             editor.commit();
         }
-    }
-
-    public static String getSchedule (Context context, String dayOfWeek) {
-        if (ArrayUtils.contains(DAY_OF_THE_WEEK_KEYS, dayOfWeek)) return PreferenceManager.getDefaultSharedPreferences(context).getString(dayOfWeek, "9:00~17:00");
-        return null;
     }
 
 }

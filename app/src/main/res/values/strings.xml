@@ -10,6 +10,7 @@
     <string name="status_label_text_stopped">Stopped</string>
     <string name="status_label_text_not_scheduled">Not Scheduled</string>
     <string name="status_label_text_not_configured">Not Configured</string>
+    <string name="label_schedule_time_off_text">Scheduling is OFF</string>>
     <string name="service_status_text">Service Status</string>
     <string name="scheduling_mode_status_text">Scheduling Mode</string>
     <string name="set_schedule_button_text">Set Schedule</string>

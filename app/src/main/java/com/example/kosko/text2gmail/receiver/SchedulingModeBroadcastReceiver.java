@@ -5,9 +5,11 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.kosko.text2gmail.fragment.EmailConfigFragment;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 
 import java.util.Calendar;
@@ -29,9 +31,12 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
         Intent intent = new Intent(context, SchedulingModeBroadcastReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, ALARM_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        long time = findNextScheduledTime(context).getNextScheduledTime();
-        Log.d(TAG, String.valueOf(time));
-        alarmManager.set(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+        SchedulingModeQueryResult queryResult = querySchedule(context);
+        Log.d(TAG, "Currently time: " + System.currentTimeMillis());
+        Log.d(TAG, "Currently scheduled?: " + queryResult.isCurrScheduled() + ", Next schedule time: " + String.valueOf(queryResult.getNextScheduledTime()));
+        DefaultSharedPreferenceManager.setCurrentlyScheduled(context, queryResult.isCurrScheduled());
+        alarmManager.set(AlarmManager.RTC_WAKEUP, queryResult.getNextScheduledTime(), pendingIntent);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(EmailConfigFragment.SCHEDULE_STATUS_INTENT));
     }
 
     public static void cancelAlarm(Context context) {
@@ -42,7 +47,7 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
         alarmManager.cancel(pendingIntent);
     }
 
-    public static SchedulingModeQueryResult findNextScheduledTime(Context context){
+    public static SchedulingModeQueryResult querySchedule(Context context){
         Calendar curr = Calendar.getInstance();
         int dayOfWeek = curr.get(Calendar.DAY_OF_WEEK);
         int keyPos = dayOfWeek == 1 ? 6 : dayOfWeek - 2;

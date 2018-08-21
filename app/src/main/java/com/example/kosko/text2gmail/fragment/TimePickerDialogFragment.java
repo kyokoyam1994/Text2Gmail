@@ -1,6 +1,7 @@
 package com.example.kosko.text2gmail.fragment;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -15,6 +16,22 @@ public class TimePickerDialogFragment extends AppCompatDialogFragment{
 
     private static final String TITLE_KEY = "TITLE_KEY";
     private TimePicker timePickerSchedule;
+    private TimeSelectedListener timeSelectedListener;
+
+
+    public interface TimeSelectedListener {
+        public void onTimeSelected(int title, int hour, int minutes, boolean cancelled);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            timeSelectedListener = (TimeSelectedListener) context;
+        } catch (ClassCastException ex) {
+            throw new ClassCastException(context.toString() + " must implement" + TimeSelectedListener.class.toString());
+        }
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -30,12 +47,14 @@ public class TimePickerDialogFragment extends AppCompatDialogFragment{
             .setView(view)
             .setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
                 @Override
-                public void onClick(DialogInterface dialog, int which) {}
+                public void onClick(DialogInterface dialog, int which) {
+                    timeSelectedListener.onTimeSelected(title, timePickerSchedule.getHour(), timePickerSchedule.getMinute(), true);
+                }
             })
             .setPositiveButton("OK", new DialogInterface.OnClickListener(){
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    System.out.println(timePickerSchedule.getHour() + ":" + timePickerSchedule.getMinute());
+                    timeSelectedListener.onTimeSelected(title, timePickerSchedule.getHour(), timePickerSchedule.getMinute(), false);
                 }
             });
         return builder.create();

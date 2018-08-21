@@ -4,17 +4,20 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 
 import com.example.kosko.text2gmail.adapter.ScheduleEntryAdapter;
 import com.example.kosko.text2gmail.fragment.TimePickerDialogFragment;
+import com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 
-public class DailySchedulerActivity extends AppCompatActivity implements View.OnClickListener, View.OnFocusChangeListener{
+public class DailySchedulerActivity extends AppCompatActivity implements View.OnClickListener,
+        View.OnFocusChangeListener, TimePickerDialogFragment.TimeSelectedListener {
 
     private Button buttonApply;
     private Button buttonOK;
@@ -45,7 +48,7 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
                 applySelection();
                 break;
             case R.id.buttonOK:
-                confirmSelection();
+                finish();
                 break;
         }
     }
@@ -62,10 +65,17 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
         }
     }
 
-    private void confirmSelection(){
-
+    @Override
+    public void onTimeSelected(int title, int hour, int minutes, boolean cancelled) {
+        String time = hour + ":" + minutes;
+        if (title == R.string.start_time_label_text) {
+            if (!cancelled) editTextStartTime.setText(time);
+            editTextStartTime.clearFocus();
+        } else if (title == R.string.end_time_label_text) {
+            if (!cancelled) editTextEndTime.setText(time);
+            editTextEndTime.clearFocus();
+        }
     }
-
 
     private void refreshSchedule() {
         ListView listViewSchedule = findViewById(R.id.listViewSchedule);
@@ -80,14 +90,39 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
     }
 
     private void applySelection(){
-        //findViewById(R.id.checkBoxMon).isSelected();
-        //findViewById(R.id.checkBoxTue).isSelected();
-        //findViewById(R.id.checkBoxWed).isSelected();
-        //findViewById(R.id.checkBoxThu).isSelected();
-        //findViewById(R.id.checkBoxFri).isSelected();
-        //findViewById(R.id.checkBoxSat).isSelected();
-        //findViewById(R.id.checkBoxSun).isSelected();
+        // Do error checking
+        // Case 1: end time < start time
+        // Case 2: start time = end time
+        // Invalid formats
+
+        /*SchedulingModeBroadcastReceiver.cancelAlarm(this);
+
+        CheckBox checkBoxMon = findViewById(R.id.checkBoxMon);
+        CheckBox checkBoxTue = findViewById(R.id.checkBoxTue);
+        CheckBox checkBoxWed = findViewById(R.id.checkBoxWed);
+        CheckBox checkBoxThu = findViewById(R.id.checkBoxThu);
+        CheckBox checkBoxFri = findViewById(R.id.checkBoxFri);
+        CheckBox checkBoxSat = findViewById(R.id.checkBoxSat);
+        CheckBox checkBoxSun = findViewById(R.id.checkBoxSun);
+
+        if (checkBoxMon.isSelected()) {
+            DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.MONDAY_SCHEDULE_KEY, "");
+        } else if (checkBoxTue.isSelected()) {
+            DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.TUESDAY_SCHEDULE_KEY, "");
+        } else if (checkBoxWed.isSelected()) {
+            DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.WEDNESDAY_SCHEDULE_KEY, "");
+        } else if (checkBoxThu.isSelected()) {
+            DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.THURSDAY_SCHEDULE_KEY, "");
+        } else if (checkBoxFri.isSelected()) {
+            DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.FRIDAY_SCHEDULE_KEY, "");
+        } else if (checkBoxSat.isSelected()) {
+            DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.SATURDAY_SCHEDULE_KEY, "");
+        } else if (checkBoxSun.isSelected()) {
+            DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.SUNDAY_SCHEDULE_KEY, "");
+        }
+
         refreshSchedule();
+        SchedulingModeBroadcastReceiver.startAlarm(this);*/
     }
 
 }

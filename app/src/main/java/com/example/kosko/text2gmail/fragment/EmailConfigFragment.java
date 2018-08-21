@@ -4,13 +4,17 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,12 +35,20 @@ import com.example.kosko.text2gmail.util.Constants;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 import com.example.kosko.text2gmail.util.Util;
 
+import java.time.DayOfWeek;
+import java.time.format.TextStyle;
+import java.util.Calendar;
+import java.util.Locale;
+
 import static android.app.Activity.RESULT_OK;
 
 public class EmailConfigFragment extends Fragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
     private static final String TAG = EmailConfigFragment.class.getName();
     private final String SCOPE = Constants.GMAIL_COMPOSE + " " + Constants.GMAIL_MODIFY + " " + Constants.MAIL_GOOGLE_COM;
+
+    private ScheduleStatusBroadcastReceiver scheduleStatusBroadcastReceiver;
+    public final static String SCHEDULE_STATUS_INTENT = "SCHEDULE_STATUS_INTENT";
 
     private static final int AUTHORIZATION_CODE = 101;
     private static final int ACCOUNT_CODE = 201;
@@ -87,6 +99,15 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
                 deleteConfiguredEmail(getView());
             }
         }
+
+        scheduleStatusBroadcastReceiver = new ScheduleStatusBroadcastReceiver();
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(scheduleStatusBroadcastReceiver, new IntentFilter(SCHEDULE_STATUS_INTENT));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(scheduleStatusBroadcastReceiver);
     }
 
     @Override
@@ -185,12 +206,15 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
     private void updateStatusCircle(View view, boolean serviceOn) {
         ImageView statusCircle = view.findViewById(R.id.statusCircle);
         TextView labelStatus = view.findViewById(R.id.labelStatus);
+        TextView labelScheduleTime = view.findViewById(R.id.labelScheduleTime);
+        boolean schedulingModeOn = DefaultSharedPreferenceManager.getSchedulingMode(getActivity());
+        boolean currentlyScheduled = DefaultSharedPreferenceManager.getCurrentlyScheduled(getActivity());
 
         if (DefaultSharedPreferenceManager.getUserEmail(getActivity()) == null || DefaultSharedPreferenceManager.getUserToken(getActivity()) == null) {
             statusCircle.getDrawable().setColorFilter(ContextCompat.getColor(getActivity(), R.color.colorGray), PorterDuff.Mode.SRC);
             labelStatus.setText(R.string.status_label_text_not_configured);
         } else if (serviceOn) {
-            if (DefaultSharedPreferenceManager.getSchedulingMode(getActivity())){
+            if (schedulingModeOn && !currentlyScheduled){
                 statusCircle.getDrawable().setColorFilter(ContextCompat.getColor(getActivity(), R.color.colorYellow), PorterDuff.Mode.SRC);
                 labelStatus.setText(R.string.status_label_text_not_scheduled);
             } else {
@@ -201,6 +225,14 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
             statusCircle.getDrawable().setColorFilter(ContextCompat.getColor(getActivity(), R.color.colorRed), PorterDuff.Mode.SRC);
             labelStatus.setText(R.string.status_label_text_stopped);
         }
+
+        if (schedulingModeOn){
+            Calendar curr = Calendar.getInstance();
+            int dayOfWeek = curr.get(Calendar.DAY_OF_WEEK);
+            DayOfWeek dayOfWeekEnum = DayOfWeek.of(dayOfWeek == 1 ? 7 : dayOfWeek - 1);
+            String scheduledTime = DefaultSharedPreferenceManager.getSchedule(getActivity(), DefaultSharedPreferenceManager.DAY_OF_THE_WEEK_KEYS[dayOfWeek == 1 ? 6 : dayOfWeek - 2]);
+            labelScheduleTime.setText(dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.getDefault()) + ", " + scheduledTime);
+        } else labelScheduleTime.setText(getResources().getString(R.string.label_schedule_time_off_text));
     }
 
     private void invalidateToken() {
@@ -240,6 +272,14 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
                 Log.e(TAG, "Exception", e);
                 deleteConfiguredEmail(getView());
             }
+        }
+    }
+
+    private class ScheduleStatusBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Switch switchServiceStatus = getView().findViewById(R.id.switchServiceStatus);
+            updateStatusCircle(getView(), switchServiceStatus.isChecked());
         }
     }
 

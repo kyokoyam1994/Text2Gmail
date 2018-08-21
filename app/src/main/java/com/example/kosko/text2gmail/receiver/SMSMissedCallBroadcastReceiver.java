@@ -33,10 +33,11 @@ public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
         String token = DefaultSharedPreferenceManager.getUserToken(context);
         boolean forwardMissedCalls = DefaultSharedPreferenceManager.getForwardMissedCalls(context);
         boolean schedulingMode = DefaultSharedPreferenceManager.getSchedulingMode(context);
+        boolean currentlyScheduled = DefaultSharedPreferenceManager.getCurrentlyScheduled(context);
 
         if (userEmail == null || token == null) {
             Log.d(TAG, "Email is not configured!");
-        } else if (schedulingMode && (!SchedulingModeBroadcastReceiver.findNextScheduledTime(context).isCurrScheduled())) {
+        } else if (schedulingMode && !currentlyScheduled) {
             Log.d(TAG, "Not currently scheduled!");
         } else if (intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED") && extras != null && extras.containsKey("pdus")) {
             Toast.makeText(context,"Sending SMS Email...",  Toast.LENGTH_SHORT).show();
