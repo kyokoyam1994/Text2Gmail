@@ -21,7 +21,7 @@
     //Daily Scheduler Strings
     <string name="start_time_label_text">Start Time</string>>
     <string name="end_time_label_text">End Time</string>>
-    <string name="time_picker_dialog_fragment_message">Please enter a time:</string>>
+    <string name="time_picker_dialog_fragment_message">Please enter a time:</string>
     <string name="button_apply_text">Apply</string>
     <string name="button_ok_text">OK</string>
     <string name="mon_abbr">M</string>
@@ -31,6 +31,8 @@
     <string name="fri_abbr">F</string>
     <string name="sat_abbr">S</string>
     <string name="sun_abbr">S</string>
+    <string name="time_picker_dialog_fragment_invalid_time">Please enter a valid start and end time.</string>
+    <string name="time_picker_dialog_fragment_end_not_after_start">The end time must be after the start time!</string>
 
     //Message Log Strings
     <string name="empty_message_text">No messages have been sent</string>

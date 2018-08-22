@@ -51,6 +51,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:ems="10"
+                android:gravity="center"
                 android:inputType="time" />
 
             <EditText
@@ -59,6 +60,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:ems="10"
+                android:gravity="center"
                 android:inputType="time" />
 
         </LinearLayout>
@@ -122,13 +124,19 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/textViewScheduleErrorMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textColor="@color/colorRed" />
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
+        android:layout_marginEnd="16dp"
         android:orientation="horizontal">
 
         <Button

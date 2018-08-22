@@ -3,6 +3,7 @@ package com.example.kosko.text2gmail.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.google.android.gms.common.util.ArrayUtils;
 
@@ -26,6 +27,10 @@ public class DefaultSharedPreferenceManager {
     public static final String[] DAY_OF_THE_WEEK_KEYS = {MONDAY_SCHEDULE_KEY, TUESDAY_SCHEDULE_KEY,
                                 WEDNESDAY_SCHEDULE_KEY, THURSDAY_SCHEDULE_KEY, FRIDAY_SCHEDULE_KEY,
                                 SATURDAY_SCHEDULE_KEY, SUNDAY_SCHEDULE_KEY};
+
+    private static final String DEFAULT_START_TIME = "9:00AM";
+    private static final String DEFAULT_END_TIME = "5:00PM";
+    private static final String DEFAULT_INTERVAL = DEFAULT_START_TIME + "~" + DEFAULT_END_TIME;
 
     public static String getUserEmail (Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context).getString(USER_EMAIL_KEY, null);
@@ -78,7 +83,7 @@ public class DefaultSharedPreferenceManager {
     }
 
     public static String getSchedule (Context context, String dayOfWeek) {
-        if (ArrayUtils.contains(DAY_OF_THE_WEEK_KEYS, dayOfWeek)) return PreferenceManager.getDefaultSharedPreferences(context).getString(dayOfWeek, "9:00~17:00");
+        if (ArrayUtils.contains(DAY_OF_THE_WEEK_KEYS, dayOfWeek)) return PreferenceManager.getDefaultSharedPreferences(context).getString(dayOfWeek, DEFAULT_INTERVAL);
         return null;
     }
 

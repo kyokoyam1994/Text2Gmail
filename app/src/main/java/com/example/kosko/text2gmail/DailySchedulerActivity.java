@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.kosko.text2gmail.adapter.ScheduleEntryAdapter;
 import com.example.kosko.text2gmail.fragment.TimePickerDialogFragment;
@@ -14,7 +15,12 @@ import com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 
 import java.time.DayOfWeek;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class DailySchedulerActivity extends AppCompatActivity implements View.OnClickListener,
         View.OnFocusChangeListener, TimePickerDialogFragment.TimeSelectedListener {
@@ -38,6 +44,15 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
         buttonOK.setOnClickListener(this);
         editTextStartTime.setOnFocusChangeListener(this);
         editTextEndTime.setOnFocusChangeListener(this);
+
+        Calendar curr = Calendar.getInstance();
+        int dayOfWeek = curr.get(Calendar.DAY_OF_WEEK);
+        int keyPos = dayOfWeek == 1 ? 6 : dayOfWeek - 2;
+        String schedule = DefaultSharedPreferenceManager.getSchedule(this, DefaultSharedPreferenceManager.DAY_OF_THE_WEEK_KEYS[keyPos]);
+        String[] intervals = schedule.split("~");
+
+        editTextStartTime.setText(intervals[0]);
+        editTextEndTime.setText(intervals[1]);
         refreshSchedule();
     }
 
@@ -57,17 +72,18 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
     public void onFocusChange(View view, boolean hasFocus) {
         switch (view.getId()){
             case R.id.editTextStartTime:
-                if(hasFocus) TimePickerDialogFragment.newInstance(R.string.start_time_label_text).show(getSupportFragmentManager(), "Start");
+                if(hasFocus) TimePickerDialogFragment.newInstance(R.string.start_time_label_text, editTextStartTime.getText().toString()).show(getSupportFragmentManager(), "Start");
                 break;
             case R.id.editTextEndTime:
-                if(hasFocus) TimePickerDialogFragment.newInstance(R.string.end_time_label_text).show(getSupportFragmentManager(), "End");
+                if(hasFocus) TimePickerDialogFragment.newInstance(R.string.end_time_label_text, editTextEndTime.getText().toString()).show(getSupportFragmentManager(), "End");
                 break;
         }
     }
 
     @Override
-    public void onTimeSelected(int title, int hour, int minutes, boolean cancelled) {
-        String time = hour + ":" + minutes;
+    public void onTimeSelected(int title, int hours, int minutes, boolean cancelled) {
+        DateTimeFormatter parseFormat = new DateTimeFormatterBuilder().appendPattern("h:mma").toFormatter();
+        String time = parseFormat.format(LocalTime.of(hours, minutes));
         if (title == R.string.start_time_label_text) {
             if (!cancelled) editTextStartTime.setText(time);
             editTextStartTime.clearFocus();
@@ -90,12 +106,24 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
     }
 
     private void applySelection(){
-        // Do error checking
-        // Case 1: end time < start time
-        // Case 2: start time = end time
-        // Invalid formats
+        TextView textViewScheduleErrorMessage = findViewById(R.id.textViewScheduleErrorMessage);
+        try {
+            DateTimeFormatter parseFormat = new DateTimeFormatterBuilder().appendPattern("h:mma").toFormatter();
+            LocalTime startTime = LocalTime.parse(editTextStartTime.getText().toString(), parseFormat);
+            LocalTime endTime = LocalTime.parse(editTextEndTime.getText().toString(), parseFormat);
+            if (!endTime.isAfter(startTime)) {
+                textViewScheduleErrorMessage.setText(R.string.time_picker_dialog_fragment_end_not_after_start);
+                return;
+            }
+        } catch (DateTimeParseException e) {
+            textViewScheduleErrorMessage.setText(R.string.time_picker_dialog_fragment_invalid_time);
+            return;
+        }
+        textViewScheduleErrorMessage.setText("");
 
-        /*SchedulingModeBroadcastReceiver.cancelAlarm(this);
+        String timeInterval = editTextStartTime.getText().toString() + "~" + editTextEndTime.getText().toString();
+        boolean schedulingOn = DefaultSharedPreferenceManager.getSchedulingMode(this);
+        if(schedulingOn) SchedulingModeBroadcastReceiver.cancelAlarm(this);
 
         CheckBox checkBoxMon = findViewById(R.id.checkBoxMon);
         CheckBox checkBoxTue = findViewById(R.id.checkBoxTue);
@@ -105,24 +133,16 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
         CheckBox checkBoxSat = findViewById(R.id.checkBoxSat);
         CheckBox checkBoxSun = findViewById(R.id.checkBoxSun);
 
-        if (checkBoxMon.isSelected()) {
-            DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.MONDAY_SCHEDULE_KEY, "");
-        } else if (checkBoxTue.isSelected()) {
-            DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.TUESDAY_SCHEDULE_KEY, "");
-        } else if (checkBoxWed.isSelected()) {
-            DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.WEDNESDAY_SCHEDULE_KEY, "");
-        } else if (checkBoxThu.isSelected()) {
-            DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.THURSDAY_SCHEDULE_KEY, "");
-        } else if (checkBoxFri.isSelected()) {
-            DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.FRIDAY_SCHEDULE_KEY, "");
-        } else if (checkBoxSat.isSelected()) {
-            DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.SATURDAY_SCHEDULE_KEY, "");
-        } else if (checkBoxSun.isSelected()) {
-            DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.SUNDAY_SCHEDULE_KEY, "");
-        }
+        if (checkBoxMon.isChecked()) DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.MONDAY_SCHEDULE_KEY, timeInterval);
+        if (checkBoxTue.isChecked()) DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.TUESDAY_SCHEDULE_KEY, timeInterval);
+        if (checkBoxWed.isChecked()) DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.WEDNESDAY_SCHEDULE_KEY, timeInterval);
+        if (checkBoxThu.isChecked()) DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.THURSDAY_SCHEDULE_KEY, timeInterval);
+        if (checkBoxFri.isChecked()) DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.FRIDAY_SCHEDULE_KEY, timeInterval);
+        if (checkBoxSat.isChecked()) DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.SATURDAY_SCHEDULE_KEY, timeInterval);
+        if (checkBoxSun.isChecked()) DefaultSharedPreferenceManager.setSchedule(this, DefaultSharedPreferenceManager.SUNDAY_SCHEDULE_KEY, timeInterval);
 
         refreshSchedule();
-        SchedulingModeBroadcastReceiver.startAlarm(this);*/
+        if(schedulingOn) SchedulingModeBroadcastReceiver.startAlarm(this);
     }
 
 }

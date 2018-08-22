@@ -63,11 +63,11 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         Button configureEmailButton = view.findViewById(R.id.configureEmailButton);
         ImageButton buttonDeleteConfiguredEmailAddress = view.findViewById(R.id.buttonDeleteConfiguredEmailAddress);
 
-        boolean isReceiverOn = Util.isSMSMissedCallBroadcastReceiverOn(getActivity());
-        switchServiceStatus.setChecked(isReceiverOn);
+        //boolean isReceiverOn = Util.isSMSMissedCallBroadcastReceiverOn(getActivity());
+        switchServiceStatus.setChecked(Util.isSMSMissedCallBroadcastReceiverOn(getActivity()));
         switchSchedulingMode.setChecked(DefaultSharedPreferenceManager.getSchedulingMode(getActivity()));
-        updateConfiguredEmail(view);
-        updateStatusCircle(view, isReceiverOn);
+        //updateConfiguredEmail(view);
+        //updateStatusCircle(view, isReceiverOn);
 
         setScheduleButton.setOnClickListener(this);
         switchServiceStatus.setOnCheckedChangeListener(this);
@@ -99,6 +99,9 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
                 deleteConfiguredEmail(getView());
             }
         }
+
+        updateConfiguredEmail(getView());
+        updateStatusCircle(getView(), Util.isSMSMissedCallBroadcastReceiverOn(getActivity()));
 
         scheduleStatusBroadcastReceiver = new ScheduleStatusBroadcastReceiver();
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(scheduleStatusBroadcastReceiver, new IntentFilter(SCHEDULE_STATUS_INTENT));
