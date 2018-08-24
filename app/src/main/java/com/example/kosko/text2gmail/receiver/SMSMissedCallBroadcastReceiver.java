@@ -33,7 +33,8 @@ public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
         String token = DefaultSharedPreferenceManager.getUserToken(context);
         boolean forwardMissedCalls = DefaultSharedPreferenceManager.getForwardMissedCalls(context);
         boolean schedulingMode = DefaultSharedPreferenceManager.getSchedulingMode(context);
-        boolean currentlyScheduled = DefaultSharedPreferenceManager.getCurrentlyScheduled(context);
+        SchedulingModeBroadcastReceiver.SchedulingModeQueryResult queryResult = SchedulingModeBroadcastReceiver.querySchedule(context);
+        boolean currentlyScheduled = queryResult.isCurrScheduled();
 
         if (userEmail == null || token == null) {
             Log.d(TAG, "Email is not configured!");

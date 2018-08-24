@@ -38,22 +38,19 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
     public static void startAlarm(Context context) {
         Log.d(TAG, "Starting alarm!");
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        //Intent intent = new Intent(context, SchedulingModeBroadcastReceiver.class);
-        Intent intent = new Intent("com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver");
+        Intent intent = new Intent("com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver", null, context, SchedulingModeBroadcastReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, ALARM_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         SchedulingModeQueryResult queryResult = querySchedule(context);
         Log.d(TAG, "Currently time: " + System.currentTimeMillis());
         Log.d(TAG, "Currently scheduled?: " + queryResult.isCurrScheduled() + ", Next schedule time: " + String.valueOf(queryResult.getNextScheduledTime()));
-        DefaultSharedPreferenceManager.setCurrentlyScheduled(context, queryResult.isCurrScheduled());
-        //alarmManager.set(AlarmManager.RTC_WAKEUP, queryResult.getNextScheduledTime(), pendingIntent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, queryResult.getNextScheduledTime(), pendingIntent);
         LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(EmailConfigFragment.SCHEDULE_STATUS_INTENT));
         isAlarmActive(context);
     }
 
     public static void cancelAlarm(Context context) {
-        //Intent intent = new Intent(context, SchedulingModeBroadcastReceiver.class);
-        Intent intent = new Intent("com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver");
+        Intent intent = new Intent("com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver", null, context, SchedulingModeBroadcastReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, ALARM_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         pendingIntent.cancel();
@@ -62,13 +59,10 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
 
     public static void isAlarmActive(Context context) {
         boolean alarmUp = (PendingIntent.getBroadcast(context, ALARM_CODE,
-                //new Intent(context, SchedulingModeBroadcastReceiver.class),
-                new Intent("com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver"),
+                new Intent("com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver", null, context, SchedulingModeBroadcastReceiver.class),
                 PendingIntent.FLAG_NO_CREATE) != null);
 
-        if (alarmUp) {
-            Log.d(TAG, "Alarm is ACTIVE");
-        }
+        if (alarmUp) Log.d(TAG, "Alarm is ACTIVE");
         else Log.d(TAG, "Alarm is NOT ACTIVE");
     }
 
@@ -115,7 +109,6 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
             nextScheduledTime = c2.getTime().getTime();
             isCurrScheduled = true;
         }
-
 
         return new SchedulingModeQueryResult(isCurrScheduled, nextScheduledTime);
     }

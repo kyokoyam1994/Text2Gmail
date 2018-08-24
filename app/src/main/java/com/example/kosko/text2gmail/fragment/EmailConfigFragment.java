@@ -63,11 +63,8 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         Button configureEmailButton = view.findViewById(R.id.configureEmailButton);
         ImageButton buttonDeleteConfiguredEmailAddress = view.findViewById(R.id.buttonDeleteConfiguredEmailAddress);
 
-        //boolean isReceiverOn = Util.isSMSMissedCallBroadcastReceiverOn(getActivity());
         switchServiceStatus.setChecked(Util.isSMSMissedCallBroadcastReceiverOn(getActivity()));
         switchSchedulingMode.setChecked(DefaultSharedPreferenceManager.getSchedulingMode(getActivity()));
-        //updateConfiguredEmail(view);
-        //updateStatusCircle(view, isReceiverOn);
 
         setScheduleButton.setOnClickListener(this);
         switchServiceStatus.setOnCheckedChangeListener(this);
@@ -211,7 +208,8 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         TextView labelStatus = view.findViewById(R.id.labelStatus);
         TextView labelScheduleTime = view.findViewById(R.id.labelScheduleTime);
         boolean schedulingModeOn = DefaultSharedPreferenceManager.getSchedulingMode(getActivity());
-        boolean currentlyScheduled = DefaultSharedPreferenceManager.getCurrentlyScheduled(getActivity());
+        SchedulingModeBroadcastReceiver.SchedulingModeQueryResult queryResult = SchedulingModeBroadcastReceiver.querySchedule(getActivity());
+        boolean currentlyScheduled = queryResult.isCurrScheduled();
 
         if (DefaultSharedPreferenceManager.getUserEmail(getActivity()) == null || DefaultSharedPreferenceManager.getUserToken(getActivity()) == null) {
             statusCircle.getDrawable().setColorFilter(ContextCompat.getColor(getActivity(), R.color.colorGray), PorterDuff.Mode.SRC);
