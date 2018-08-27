@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.kosko.text2gmail.fragment.EmailConfigFragment;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
@@ -24,29 +23,30 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "ON RECEIVE");
-        Toast.makeText(context,"Alarm started",  Toast.LENGTH_SHORT).show();
         Log.d(TAG, "Intent is.. " + intent.getAction());
         if (intent.getAction() != null) {
             if (intent.getAction().equals("com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver") ||
                 (intent.getAction().equals("android.intent.action.BOOT_COMPLETED") && DefaultSharedPreferenceManager.getSchedulingMode(context))) {
+                    startAlarm(context);
+            } else if ( DefaultSharedPreferenceManager.getSchedulingMode(context) &&
+                (intent.getAction().equals(Intent.ACTION_DATE_CHANGED) ||
+                intent.getAction().equals(Intent.ACTION_TIME_CHANGED) ||
+                intent.getAction().equals(Intent.ACTION_TIMEZONE_CHANGED))) {
+                    cancelAlarm(context);
                     startAlarm(context);
             }
         }
     }
 
     public static void startAlarm(Context context) {
-        Log.d(TAG, "Starting alarm!");
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent("com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver", null, context, SchedulingModeBroadcastReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, ALARM_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         SchedulingModeQueryResult queryResult = querySchedule(context);
-        Log.d(TAG, "Currently time: " + System.currentTimeMillis());
-        Log.d(TAG, "Currently scheduled?: " + queryResult.isCurrScheduled() + ", Next schedule time: " + String.valueOf(queryResult.getNextScheduledTime()));
         alarmManager.set(AlarmManager.RTC_WAKEUP, queryResult.getNextScheduledTime(), pendingIntent);
+        //alarmManager.setExact(AlarmManager.RTC_WAKEUP, queryResult.getNextScheduledTime(), pendingIntent);
         LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(EmailConfigFragment.SCHEDULE_STATUS_INTENT));
-        isAlarmActive(context);
     }
 
     public static void cancelAlarm(Context context) {
@@ -57,13 +57,10 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
         alarmManager.cancel(pendingIntent);
     }
 
-    public static void isAlarmActive(Context context) {
-        boolean alarmUp = (PendingIntent.getBroadcast(context, ALARM_CODE,
-                new Intent("com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver", null, context, SchedulingModeBroadcastReceiver.class),
-                PendingIntent.FLAG_NO_CREATE) != null);
-
-        if (alarmUp) Log.d(TAG, "Alarm is ACTIVE");
-        else Log.d(TAG, "Alarm is NOT ACTIVE");
+    public static boolean isAlarmActive(Context context) {
+        return (PendingIntent.getBroadcast(context, ALARM_CODE,
+            new Intent("com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver", null, context, SchedulingModeBroadcastReceiver.class),
+            PendingIntent.FLAG_NO_CREATE) != null);
     }
 
     public static SchedulingModeQueryResult querySchedule(Context context){
@@ -91,9 +88,6 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
 
         boolean isCurrScheduled = false;
         long nextScheduledTime;
-
-        Log.d(TAG, "Current time:" + curr.getTime().getTime());
-        Log.d(TAG, c.getTime().getTime() +  "," + c2.getTime().getTime());
 
         if(curr.before(c)) nextScheduledTime = c.getTime().getTime();
         else if(curr.after(c2)){

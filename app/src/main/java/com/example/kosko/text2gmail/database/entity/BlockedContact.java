@@ -11,6 +11,10 @@ public class BlockedContact {
     @NonNull
     private String blockedNumber;
 
+    public BlockedContact(@NonNull String blockedNumber) {
+        this.blockedNumber = blockedNumber;
+    }
+
     public String getBlockedNumber() {
         return blockedNumber;
     }

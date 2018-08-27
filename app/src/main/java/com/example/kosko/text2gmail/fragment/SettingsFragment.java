@@ -12,7 +12,11 @@ import android.widget.CompoundButton;
 
 import com.example.kosko.text2gmail.ContactSelectionActivity;
 import com.example.kosko.text2gmail.R;
+import com.example.kosko.text2gmail.database.AppDatabase;
+import com.example.kosko.text2gmail.database.entity.BlockedContact;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
+
+import java.util.ArrayList;
 
 public class SettingsFragment extends Fragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
@@ -41,6 +45,18 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
             String blockedNumber = data.getStringExtra(ContactsManualDialogFragment.BLOCKED_CONTACT_MANUAL_KEY);
         } else if(requestCode == RC_CONTACT_FROM_BOOK) {
             //Handle Contact From Book
+            ArrayList<String> selectedContacts = data.getStringArrayListExtra("Test");
+            if (data != null) {
+                ArrayList<BlockedContact> blockedContacts = new ArrayList<>();
+                for (String contact : selectedContacts) blockedContacts.add(new BlockedContact(contact));
+                //Add to database
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (String number : selectedContacts) AppDatabase.getInstance(getActivity()).blockedContactDao().insertAll(blockedContacts);
+                    }
+                }).start();
+            }
         }
     }
 

@@ -14,11 +14,7 @@ import com.example.kosko.text2gmail.adapter.ContactSelectionAdapter;
 public class ContactSelectionActivity extends AppCompatActivity{
 
     private ListView listViewContacts;
-    private ContactSelectionAdapter mCursorAdapter;
-    private static final String[] FROM_COLUMNS = {ContactsContract.Contacts.DISPLAY_NAME_PRIMARY};
-    private static final int[] TO_IDS = {R.id.textViewContactName};
-
-    private static final String[] PROJECTION = {ContactsContract.Contacts._ID, ContactsContract.Contacts.LOOKUP_KEY, ContactsContract.Contacts.DISPLAY_NAME_PRIMARY};
+    private ContactSelectionAdapter contactSelectionAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,8 +24,8 @@ public class ContactSelectionActivity extends AppCompatActivity{
         listViewContacts = findViewById(R.id.listViewContacts);
         ContentResolver contentResolver = getContentResolver();
         Cursor cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI,null, null, null, null);
-        mCursorAdapter = new ContactSelectionAdapter(this, R.layout.contact_list_item, cursor, FROM_COLUMNS, TO_IDS,0);
-        listViewContacts.setAdapter(mCursorAdapter);
+        contactSelectionAdapter = new ContactSelectionAdapter(this, cursor, 0);
+        listViewContacts.setAdapter(contactSelectionAdapter);
     }
 
     @Override
