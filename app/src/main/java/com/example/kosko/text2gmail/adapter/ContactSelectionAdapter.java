@@ -25,7 +25,9 @@ public class ContactSelectionAdapter extends CursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         TextView textViewContactName = view.findViewById(R.id.textViewContactName);
+        TextView textViewPhoneNumber = view.findViewById(R.id.textViewPhoneNumber);
         textViewContactName.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY)));
+        textViewPhoneNumber.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)));
     }
 
 }
