@@ -1,5 +1,6 @@
 package com.example.kosko.text2gmail.fragment;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -45,8 +46,8 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
             String blockedNumber = data.getStringExtra(ContactsManualDialogFragment.BLOCKED_CONTACT_MANUAL_KEY);
         } else if(requestCode == RC_CONTACT_FROM_BOOK) {
             //Handle Contact From Book
-            ArrayList<String> selectedContacts = data.getStringArrayListExtra("Test");
-            if (data != null) {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                ArrayList<String> selectedContacts = data.getStringArrayListExtra(ContactSelectionActivity.SELECTED_CONTACTS_LIST);
                 ArrayList<BlockedContact> blockedContacts = new ArrayList<>();
                 for (String contact : selectedContacts) blockedContacts.add(new BlockedContact(contact));
                 //Add to database

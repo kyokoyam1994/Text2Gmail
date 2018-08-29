@@ -6,15 +6,27 @@ import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
 import com.example.kosko.text2gmail.R;
 
-public class ContactSelectionAdapter extends CursorAdapter {
+public class ContactSelectionAdapter extends CursorAdapter implements View.OnClickListener {
+
+    private ContactAddedListener contactAddedListener;
+
+    public interface ContactAddedListener {
+        void onContactAdded(String contactNumber);
+    }
 
     public ContactSelectionAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
+        try {
+            contactAddedListener = (ContactAddedListener) context;
+        } catch (ClassCastException ex) {
+            throw new ClassCastException(context.toString() + " must implement" + ContactAddedListener.class.toString());
+        }
     }
 
     @Override
@@ -26,8 +38,23 @@ public class ContactSelectionAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         TextView textViewContactName = view.findViewById(R.id.textViewContactName);
         TextView textViewPhoneNumber = view.findViewById(R.id.textViewPhoneNumber);
+        Button buttonAddContact = view.findViewById(R.id.buttonAddContact);
+        buttonAddContact.setOnClickListener(this);
+
         textViewContactName.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY)));
         textViewPhoneNumber.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)));
+        //Log.d("TEST", cursor.getString(cursor.getColumnIndex(ContactsContract.DisplayPhoto)));
     }
 
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.buttonAddContact:
+                View parentRow = (View) view.getParent();
+                TextView textViewPhoneNumber = parentRow.findViewById(R.id.textViewPhoneNumber);
+                contactAddedListener.onContactAdded(textViewPhoneNumber.getText().toString());
+                //Refresh contacts
+                break;
+        }
+    }
 }
