@@ -23,7 +23,6 @@ public class TimePickerDialogFragment extends AppCompatDialogFragment{
     private TimePicker timePickerSchedule;
     private TimeSelectedListener timeSelectedListener;
 
-
     public interface TimeSelectedListener {
         void onTimeSelected(int title, int hour, int minutes, boolean cancelled);
     }

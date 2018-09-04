@@ -1,8 +1,10 @@
 package com.example.kosko.text2gmail.fragment;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,13 +14,17 @@ import android.widget.CompoundButton;
 
 import com.example.kosko.text2gmail.ContactSelectionActivity;
 import com.example.kosko.text2gmail.R;
+import com.example.kosko.text2gmail.adapter.BlockedContactAdapter;
 import com.example.kosko.text2gmail.database.AppDatabase;
 import com.example.kosko.text2gmail.database.entity.BlockedContact;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
+import com.example.kosko.text2gmail.util.Util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
-public class SettingsFragment extends Fragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
+public class SettingsFragment extends ListFragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
     private static final int RC_CONTACT_MANUAL = 101;
     private static final int RC_CONTACT_FROM_BOOK = 201;
@@ -45,15 +51,15 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
             String blockedNumber = data.getStringExtra(ContactsManualDialogFragment.BLOCKED_CONTACT_MANUAL_KEY);
         } else if(requestCode == RC_CONTACT_FROM_BOOK) {
             //Handle Contact From Book
-            ArrayList<String> selectedContacts = data.getStringArrayListExtra("Test");
-            if (data != null) {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                ArrayList<String> selectedContacts = data.getStringArrayListExtra(ContactSelectionActivity.SELECTED_CONTACTS_LIST);
                 ArrayList<BlockedContact> blockedContacts = new ArrayList<>();
                 for (String contact : selectedContacts) blockedContacts.add(new BlockedContact(contact));
                 //Add to database
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        for (String number : selectedContacts) AppDatabase.getInstance(getActivity()).blockedContactDao().insertAll(blockedContacts);
+                        AppDatabase.getInstance(getActivity()).blockedContactDao().insertAll(blockedContacts);
                     }
                 }).start();
             }
@@ -94,6 +100,24 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
 
     public void toggleForwardMissedCalls(boolean isChecked) {
         DefaultSharedPreferenceManager.setForwardMissedCalls(getActivity(), isChecked);
+    }
+
+    private class BlockedContactTask extends AsyncTask<Void, Void, List<BlockedContact>> {
+
+        private HashMap<String, String> contactNameMap = new HashMap<>();
+
+        @Override
+        protected List<BlockedContact> doInBackground(Void... voids) {
+            List<BlockedContact> blockedContacts = AppDatabase.getInstance(getActivity()).blockedContactDao().getAll();
+            for (BlockedContact contact : blockedContacts) contactNameMap.put(contact.getBlockedNumber(), Util.findContactNameByNumber(getActivity(), contact.getBlockedNumber()));
+            return blockedContacts;
+        }
+
+        @Override
+        protected void onPostExecute(List<BlockedContact> blockedContacts) {
+            BlockedContactAdapter adapter = new BlockedContactAdapter(getActivity(), R.layout.contact_list_item, blockedContacts, contactNameMap);
+            setListAdapter(adapter);
+        }
     }
 
 }
