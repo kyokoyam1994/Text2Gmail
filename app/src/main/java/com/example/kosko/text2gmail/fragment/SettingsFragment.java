@@ -55,13 +55,7 @@ public class SettingsFragment extends ListFragment implements View.OnClickListen
                 ArrayList<String> selectedContacts = data.getStringArrayListExtra(ContactSelectionActivity.SELECTED_CONTACTS_LIST);
                 ArrayList<BlockedContact> blockedContacts = new ArrayList<>();
                 for (String contact : selectedContacts) blockedContacts.add(new BlockedContact(contact));
-                //Add to database
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        AppDatabase.getInstance(getActivity()).blockedContactDao().insertAll(blockedContacts);
-                    }
-                }).start();
+                new Thread(() -> AppDatabase.getInstance(getActivity()).blockedContactDao().insertAll(blockedContacts)).start();
             }
         }
     }
