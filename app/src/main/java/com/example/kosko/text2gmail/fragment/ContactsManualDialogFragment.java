@@ -28,17 +28,11 @@ public class ContactsManualDialogFragment extends AppCompatDialogFragment {
 
         builder.setTitle("Blocked Contact")
             .setView(view)
-            .setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
-                @Override
-                public void onClick(DialogInterface dialog, int which) {}
-            })
-            .setPositiveButton("OK", new DialogInterface.OnClickListener(){
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent intent = new Intent();
-                    intent.putExtra(BLOCKED_CONTACT_MANUAL_KEY, editTextEmailAddress.getText().toString());
-                    getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, intent);
-                }
+            .setNegativeButton("Cancel", (dialog, which) -> {})
+            .setPositiveButton("OK", (dialog, which) -> {
+                Intent intent = new Intent();
+                intent.putExtra(BLOCKED_CONTACT_MANUAL_KEY, editTextEmailAddress.getText().toString());
+                getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, intent);
             });
         return builder.create();
     }

@@ -12,9 +12,7 @@ import android.widget.TextView;
 import com.example.kosko.text2gmail.R;
 import com.example.kosko.text2gmail.ScheduleEntry;
 
-import java.time.format.TextStyle;
 import java.util.List;
-import java.util.Locale;
 
 public class ScheduleEntryAdapter extends ArrayAdapter<ScheduleEntry> {
 
@@ -35,7 +33,7 @@ public class ScheduleEntryAdapter extends ArrayAdapter<ScheduleEntry> {
         TextView textViewScheduledStartTime = v.findViewById(R.id.textViewScheduledStartTime);
         TextView textViewScheduledEndTime = v.findViewById(R.id.textViewScheduledEndTime);
 
-        textViewDayOfWeek.setText(entry.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.getDefault()));
+        textViewDayOfWeek.setText(entry.getDayOfTheWeek().getName());
         textViewScheduledStartTime.setText(entry.getStartTime());
         textViewScheduledEndTime.setText(entry.getEndTime());
         return v;

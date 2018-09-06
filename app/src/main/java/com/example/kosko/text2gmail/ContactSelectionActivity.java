@@ -6,10 +6,13 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.design.chip.Chip;
+import android.support.design.chip.ChipGroup;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
 
@@ -52,7 +55,15 @@ public class ContactSelectionActivity extends AppCompatActivity implements Conta
 
     @Override
     public void onContactAdded(String contactNumber) {
-        blockedContactsSet.add(contactNumber);
+        if(!blockedContactsSet.contains(contactNumber)) {
+            blockedContactsSet.add(contactNumber);
+            Chip chip = new Chip(this);
+            chip.setChipText(contactNumber);
+            chip.setCloseIconEnabled(true);
+            chip.setOnCloseIconClickListener((view) -> removeChip(view, contactNumber));
+            ChipGroup chipGroupSelectedContacts = findViewById(R.id.chipGroupSelectedContacts);
+            chipGroupSelectedContacts.addView(chip);
+        }
     }
 
     @Override
@@ -75,6 +86,11 @@ public class ContactSelectionActivity extends AppCompatActivity implements Conta
             setResult(Activity.RESULT_OK, resultIntent);
         }
         finish();
+    }
+
+    private void removeChip(View view, String contactNumber){
+        blockedContactsSet.remove(contactNumber);
+        ((ViewGroup) view.getParent()).removeView(view);
     }
 
 }

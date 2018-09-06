@@ -29,6 +29,7 @@ import android.widget.ViewSwitcher;
 
 import com.example.kosko.text2gmail.DailySchedulerActivity;
 import com.example.kosko.text2gmail.R;
+import com.example.kosko.text2gmail.ScheduleEntry;
 import com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver;
 import com.example.kosko.text2gmail.receiver.SMSMissedCallBroadcastReceiver;
 import com.example.kosko.text2gmail.util.Constants;
@@ -230,9 +231,10 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         if (schedulingModeOn){
             Calendar curr = Calendar.getInstance();
             int dayOfWeek = curr.get(Calendar.DAY_OF_WEEK);
-            DayOfWeek dayOfWeekEnum = DayOfWeek.of(dayOfWeek == 1 ? 7 : dayOfWeek - 1);
+            ScheduleEntry.DayOfTheWeek dayOfTheWeekEnum = ScheduleEntry.DayOfTheWeek.from(dayOfWeek == 1 ? 7 : dayOfWeek - 1);
+
             String scheduledTime = DefaultSharedPreferenceManager.getSchedule(getActivity(), DefaultSharedPreferenceManager.DAY_OF_THE_WEEK_KEYS[dayOfWeek == 1 ? 6 : dayOfWeek - 2]);
-            labelScheduleTime.setText(dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.getDefault()) + ", " + scheduledTime);
+            labelScheduleTime.setText(dayOfTheWeekEnum.getName() + ", " + scheduledTime);
         } else labelScheduleTime.setText(getResources().getString(R.string.label_schedule_time_off_text));
     }
 

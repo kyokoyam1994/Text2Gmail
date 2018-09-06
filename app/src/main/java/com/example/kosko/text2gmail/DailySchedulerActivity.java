@@ -14,6 +14,9 @@ import com.example.kosko.text2gmail.fragment.TimePickerDialogFragment;
 import com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -21,6 +24,7 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 public class DailySchedulerActivity extends AppCompatActivity implements View.OnClickListener,
         View.OnFocusChangeListener, TimePickerDialogFragment.TimeSelectedListener {
@@ -82,8 +86,15 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
 
     @Override
     public void onTimeSelected(int title, int hours, int minutes, boolean cancelled) {
-        DateTimeFormatter parseFormat = new DateTimeFormatterBuilder().appendPattern("h:mma").toFormatter();
-        String time = parseFormat.format(LocalTime.of(hours, minutes));
+        // DateTimeFormatter parseFormat = new DateTimeFormatterBuilder().appendPattern("h:mma").toFormatter();
+        // String time = parseFormat.format(LocalTime.of(hours, minutes));
+
+        DateFormat parseFormat = new SimpleDateFormat("h:mma");
+        Calendar curr = Calendar.getInstance();
+        curr.set(Calendar.HOUR_OF_DAY, hours);
+        curr.set(Calendar.MINUTE, minutes);
+        String time = parseFormat.format(curr.getTime());
+
         if (title == R.string.start_time_label_text) {
             if (!cancelled) editTextStartTime.setText(time);
             editTextStartTime.clearFocus();
@@ -99,7 +110,7 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
         for (int i = 0; i < DefaultSharedPreferenceManager.DAY_OF_THE_WEEK_KEYS.length; i++) {
             String schedule = DefaultSharedPreferenceManager.getSchedule(this, DefaultSharedPreferenceManager.DAY_OF_THE_WEEK_KEYS[i]);
             String[] intervals = schedule.split("~");
-            entries.add(new ScheduleEntry(DayOfWeek.of(i+1), intervals[0], intervals[1]));
+            entries.add(new ScheduleEntry(ScheduleEntry.DayOfTheWeek.from(i+1), intervals[0], intervals[1]));
         }
         ScheduleEntryAdapter scheduleEntryAdapter = new ScheduleEntryAdapter(this, R.layout.schedule_list_item, entries);
         listViewSchedule.setAdapter(scheduleEntryAdapter);
@@ -107,7 +118,7 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
 
     private void applySelection(){
         TextView textViewScheduleErrorMessage = findViewById(R.id.textViewScheduleErrorMessage);
-        try {
+        /*try {
             DateTimeFormatter parseFormat = new DateTimeFormatterBuilder().appendPattern("h:mma").toFormatter();
             LocalTime startTime = LocalTime.parse(editTextStartTime.getText().toString(), parseFormat);
             LocalTime endTime = LocalTime.parse(editTextEndTime.getText().toString(), parseFormat);
@@ -116,6 +127,19 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
                 return;
             }
         } catch (DateTimeParseException e) {
+            textViewScheduleErrorMessage.setText(R.string.time_picker_dialog_fragment_invalid_time);
+            return;
+        }*/
+
+        try {
+            DateFormat format = new SimpleDateFormat("h:mma");
+            Date startTime = format.parse(editTextStartTime.getText().toString());
+            Date endTime = format.parse(editTextEndTime.getText().toString());
+            if (!endTime.after(startTime)) {
+                textViewScheduleErrorMessage.setText(R.string.time_picker_dialog_fragment_end_not_after_start);
+                return;
+            }
+        } catch (ParseException e) {
             textViewScheduleErrorMessage.setText(R.string.time_picker_dialog_fragment_invalid_time);
             return;
         }

@@ -11,10 +11,14 @@ import android.util.Log;
 import com.example.kosko.text2gmail.fragment.EmailConfigFragment;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.Calendar;
+import java.util.Date;
 
 public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
 
@@ -70,7 +74,7 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
         String schedule = DefaultSharedPreferenceManager.getSchedule(context, DefaultSharedPreferenceManager.DAY_OF_THE_WEEK_KEYS[keyPos]);
         String[] intervals = schedule.split("~");
 
-        DateTimeFormatter parseFormat = new DateTimeFormatterBuilder().appendPattern("h:mma").toFormatter();
+        /*DateTimeFormatter parseFormat = new DateTimeFormatterBuilder().appendPattern("h:mma").toFormatter();
         LocalTime localTime = LocalTime.parse(intervals[0], parseFormat);
         LocalTime localTime2 = LocalTime.parse(intervals[1], parseFormat);
         Calendar c = (Calendar) curr.clone();
@@ -84,7 +88,31 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
         c2.set(Calendar.HOUR_OF_DAY, localTime2.getHour());
         c2.set(Calendar.MINUTE, localTime2.getMinute());
         c2.set(Calendar.SECOND, 0);
-        c2.set(Calendar.MILLISECOND, 0);
+        c2.set(Calendar.MILLISECOND, 0);*/
+
+        Calendar c = (Calendar) curr.clone();
+        Calendar c2 = (Calendar) curr.clone();
+        DateFormat format = new SimpleDateFormat("h:mma");
+        try {
+            Date parsedTime = format.parse(intervals[0]);
+            Date parsedTime2 = format.parse(intervals[1]);
+            Calendar temp = Calendar.getInstance();
+            Calendar temp2 = Calendar.getInstance();
+            temp.setTime(parsedTime);
+            temp2.setTime(parsedTime2);
+
+            c.set(Calendar.HOUR_OF_DAY, temp.get(Calendar.HOUR_OF_DAY));
+            c.set(Calendar.MINUTE, temp.get(Calendar.MINUTE));
+            c.set(Calendar.SECOND, 0);
+            c.set(Calendar.MILLISECOND, 0);
+
+            c2.set(Calendar.HOUR_OF_DAY, temp2.get(Calendar.HOUR_OF_DAY));
+            c2.set(Calendar.MINUTE, temp2.get(Calendar.MINUTE));
+            c2.set(Calendar.SECOND, 0);
+            c2.set(Calendar.MILLISECOND, 0);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
         boolean isCurrScheduled = false;
         long nextScheduledTime;
@@ -103,7 +131,6 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
             nextScheduledTime = c2.getTime().getTime();
             isCurrScheduled = true;
         }
-
         return new SchedulingModeQueryResult(isCurrScheduled, nextScheduledTime);
     }
 

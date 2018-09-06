@@ -12,9 +12,14 @@ import android.widget.TimePicker;
 
 import com.example.kosko.text2gmail.R;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.util.Calendar;
+import java.util.Date;
 
 public class TimePickerDialogFragment extends AppCompatDialogFragment{
 
@@ -47,7 +52,7 @@ public class TimePickerDialogFragment extends AppCompatDialogFragment{
         String time = getArguments().getString(TIME_KEY);
         timePickerSchedule = view.findViewById(R.id.timePickerSchedule);
 
-        try {
+        /*try {
             DateTimeFormatter parseFormat = new DateTimeFormatterBuilder().appendPattern("h:mma").toFormatter();
             LocalTime localTime = LocalTime.parse(time, parseFormat);
             timePickerSchedule.setHour(localTime.getHour());
@@ -55,23 +60,25 @@ public class TimePickerDialogFragment extends AppCompatDialogFragment{
         } catch (Exception e) {
             timePickerSchedule.setHour(0);
             timePickerSchedule.setMinute(0);
+        }*/
+
+        try {
+            DateFormat format = new SimpleDateFormat("h:mma");
+            Date parsedTime = format.parse(time);
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(parsedTime);
+            timePickerSchedule.setHour(cal.get(Calendar.HOUR_OF_DAY));
+            timePickerSchedule.setMinute(cal.get(Calendar.MINUTE));
+        } catch (ParseException e) {
+            timePickerSchedule.setHour(0);
+            timePickerSchedule.setMinute(0);
         }
 
         builder.setTitle(title)
             .setMessage(R.string.time_picker_dialog_fragment_message)
             .setView(view)
-            .setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    timeSelectedListener.onTimeSelected(title, timePickerSchedule.getHour(), timePickerSchedule.getMinute(), true);
-                }
-            })
-            .setPositiveButton("OK", new DialogInterface.OnClickListener(){
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    timeSelectedListener.onTimeSelected(title, timePickerSchedule.getHour(), timePickerSchedule.getMinute(), false);
-                }
-            });
+            .setNegativeButton("Cancel", (dialog, which) -> timeSelectedListener.onTimeSelected(title, timePickerSchedule.getHour(), timePickerSchedule.getMinute(), true))
+            .setPositiveButton("OK", (dialog, which) -> timeSelectedListener.onTimeSelected(title, timePickerSchedule.getHour(), timePickerSchedule.getMinute(), false));
         return builder.create();
     }
 
