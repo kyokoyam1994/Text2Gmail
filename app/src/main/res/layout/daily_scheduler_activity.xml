@@ -52,7 +52,7 @@
                 android:layout_weight="1"
                 android:ems="10"
                 android:gravity="center"
-                android:inputType="time" />
+                android:inputType="none" />
 
             <EditText
                 android:id="@+id/editTextEndTime"
@@ -61,7 +61,7 @@
                 android:layout_weight="1"
                 android:ems="10"
                 android:gravity="center"
-                android:inputType="time" />
+                android:inputType="none" />
 
         </LinearLayout>
     </LinearLayout>

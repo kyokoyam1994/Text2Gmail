@@ -1,7 +1,9 @@
 package com.example.kosko.text2gmail;
 
 import android.app.Activity;
+import android.app.SearchManager;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -15,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.SearchView;
 
 import com.example.kosko.text2gmail.adapter.ContactSelectionAdapter;
 
@@ -25,6 +28,11 @@ import java.util.Set;
 public class ContactSelectionActivity extends AppCompatActivity implements ContactSelectionAdapter.ContactAddedListener, View.OnClickListener {
 
     public final static String SELECTED_CONTACTS_LIST = "SELECTED_CONTACTS_LIST";
+    public final static String[] CONTACTS_PROJECTION = {ContactsContract.Contacts._ID,
+                                                        ContactsContract.Contacts.DISPLAY_NAME_PRIMARY,
+                                                        ContactsContract.Contacts.PHOTO_THUMBNAIL_URI,
+                                                        ContactsContract.CommonDataKinds.Phone.NUMBER};
+
     private ContactSelectionAdapter contactSelectionAdapter;
     private Set<String> blockedContactsSet;
 
@@ -40,8 +48,8 @@ public class ContactSelectionActivity extends AppCompatActivity implements Conta
 
         buttonOK.setOnClickListener(this);
         buttonCancel.setOnClickListener(this);
-        ContentResolver contentResolver = getContentResolver();
-        Cursor cursor = contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null, null, null, null);
+
+        Cursor cursor = queryContacts("");
         contactSelectionAdapter = new ContactSelectionAdapter(this, cursor, 0);
         listViewContacts.setAdapter(contactSelectionAdapter);
     }
@@ -50,6 +58,24 @@ public class ContactSelectionActivity extends AppCompatActivity implements Conta
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.options_menu, menu);
+
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                /*ListView listViewContacts = findViewById(R.id.listViewContacts);
+                Cursor cursor = queryContacts(s);
+                contactSelectionAdapter = new ContactSelectionAdapter(ContactSelectionActivity.this, cursor, 0);
+                listViewContacts.setAdapter(contactSelectionAdapter);*/
+                return false;
+            }
+        });
         return true;
     }
 
@@ -92,5 +118,13 @@ public class ContactSelectionActivity extends AppCompatActivity implements Conta
         blockedContactsSet.remove(contactNumber);
         ((ViewGroup) view.getParent()).removeView(view);
     }
+
+    private Cursor queryContacts(String input){
+        String queryString = "%" + input + "%";
+        ContentResolver contentResolver = getContentResolver();
+        return contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, CONTACTS_PROJECTION,
+                            ContactsContract.Contacts.DISPLAY_NAME_PRIMARY + " LIKE ?", new String[]{queryString}, null);
+    }
+
 
 }
