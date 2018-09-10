@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import android.telephony.PhoneNumberUtils;
 import android.util.Log;
 
 import com.example.kosko.text2gmail.database.AppDatabase;
@@ -41,20 +42,16 @@ public class EmailIntentService extends IntentService {
     protected void onHandleIntent(@Nullable Intent intent) {
         if(intent != null) {
             List<BlockedContact> blockedContacts =  AppDatabase.getInstance(this).blockedContactDao().getAll();
-            List<String> blockedNumbers = new ArrayList<>();
-            for (BlockedContact contact : blockedContacts) blockedNumbers.add(contact.getBlockedNumber());
 
             String senderNumber = intent.getStringExtra(SMS_SENDER_NUMBER);
             String smsContents = intent.getStringExtra(SMS_CONTENTS);
             long smsDateReceived = intent.getLongExtra(SMS_DATE_RECEIVED, System.currentTimeMillis());
 
-
-            Log.d(TAG, senderNumber);
-            Log.d(TAG, blockedNumbers.toArray().toString());
-
-            if (blockedNumbers.contains(senderNumber)){
-                Log.d(TAG, senderNumber + "is blocked, ignoring...");
-                return;
+            for (BlockedContact contact : blockedContacts) {
+                if (PhoneNumberUtils.compare(contact.getBlockedNumber(), senderNumber)){
+                    Log.d(TAG, senderNumber + "is blocked, ignoring...");
+                    return;
+                }
             }
 
             String senderName = Util.findContactNameByNumber(this, senderNumber);
