@@ -7,12 +7,15 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.example.kosko.text2gmail.database.AppDatabase;
+import com.example.kosko.text2gmail.database.entity.BlockedContact;
 import com.example.kosko.text2gmail.database.entity.LogEntry;
 import com.example.kosko.text2gmail.fragment.MessageLogFragment;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 import com.example.kosko.text2gmail.util.Util;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class EmailIntentService extends IntentService {
 
@@ -37,9 +40,22 @@ public class EmailIntentService extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         if(intent != null) {
+            List<BlockedContact> blockedContacts =  AppDatabase.getInstance(this).blockedContactDao().getAll();
+            List<String> blockedNumbers = new ArrayList<>();
+            for (BlockedContact contact : blockedContacts) blockedNumbers.add(contact.getBlockedNumber());
+
             String senderNumber = intent.getStringExtra(SMS_SENDER_NUMBER);
             String smsContents = intent.getStringExtra(SMS_CONTENTS);
             long smsDateReceived = intent.getLongExtra(SMS_DATE_RECEIVED, System.currentTimeMillis());
+
+
+            Log.d(TAG, senderNumber);
+            Log.d(TAG, blockedNumbers.toArray().toString());
+
+            if (blockedNumbers.contains(senderNumber)){
+                Log.d(TAG, senderNumber + "is blocked, ignoring...");
+                return;
+            }
 
             String senderName = Util.findContactNameByNumber(this, senderNumber);
             String emailSubject;
@@ -52,6 +68,7 @@ public class EmailIntentService extends IntentService {
                 case EMAIL_TYPE_MISSED_CALL:
                     emailSubject = "Missed Call From " + (senderName == null ? senderNumber : senderName);
                     emailBody = "Call received on " + new Date(smsDateReceived).toString();
+                    smsContents = emailSubject;
                     break;
                 default:
                     return;

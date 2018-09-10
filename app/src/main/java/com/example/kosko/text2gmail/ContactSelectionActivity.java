@@ -69,10 +69,8 @@ public class ContactSelectionActivity extends AppCompatActivity implements Conta
 
             @Override
             public boolean onQueryTextChange(String s) {
-                /*ListView listViewContacts = findViewById(R.id.listViewContacts);
                 Cursor cursor = queryContacts(s);
-                contactSelectionAdapter = new ContactSelectionAdapter(ContactSelectionActivity.this, cursor, 0);
-                listViewContacts.setAdapter(contactSelectionAdapter);*/
+                contactSelectionAdapter.changeCursor(cursor);
                 return false;
             }
         });
@@ -123,7 +121,7 @@ public class ContactSelectionActivity extends AppCompatActivity implements Conta
         String queryString = "%" + input + "%";
         ContentResolver contentResolver = getContentResolver();
         return contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, CONTACTS_PROJECTION,
-                            ContactsContract.Contacts.DISPLAY_NAME_PRIMARY + " LIKE ?", new String[]{queryString}, null);
+                            ContactsContract.Contacts.DISPLAY_NAME_PRIMARY + " LIKE ?", new String[]{queryString}, ContactsContract.Contacts.DISPLAY_NAME_PRIMARY + " ASC");
     }
 
 

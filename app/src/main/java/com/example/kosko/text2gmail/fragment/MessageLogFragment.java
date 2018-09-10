@@ -26,8 +26,8 @@ import java.util.List;
 
 public class MessageLogFragment extends ListFragment implements View.OnClickListener{
 
-    private final static String CLEAR_OPERATION = "CLEAR_OPERATION";
-    public final static String REFRESH_INTENT = "REFRESH_INTENT";
+    private static final String CLEAR_OPERATION = "CLEAR_OPERATION";
+    public static final String REFRESH_INTENT = "REFRESH_INTENT";
 
     private LogUpdateBroadcastReceiver logUpdateBroadcastReceiver;
     private Spinner spinnerSortLog;

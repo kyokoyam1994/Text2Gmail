@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,8 +26,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class SettingsFragment extends ListFragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
+public class SettingsFragment extends Fragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
+    private static final String INSERT_OPERATION = "INSERT_OPERATION";
     private static final int RC_CONTACT_MANUAL = 101;
     private static final int RC_CONTACT_FROM_BOOK = 201;
 
@@ -41,6 +44,7 @@ public class SettingsFragment extends ListFragment implements View.OnClickListen
         checkBoxMissedCalls.setOnCheckedChangeListener(this);
         buttonBlockContactsManual.setOnClickListener(this);
         buttonBlockContactsFromBook.setOnClickListener(this);
+        refreshBlockedContacts();
         return view;
     }
 
@@ -55,7 +59,10 @@ public class SettingsFragment extends ListFragment implements View.OnClickListen
                 ArrayList<String> selectedContacts = data.getStringArrayListExtra(ContactSelectionActivity.SELECTED_CONTACTS_LIST);
                 ArrayList<BlockedContact> blockedContacts = new ArrayList<>();
                 for (String contact : selectedContacts) blockedContacts.add(new BlockedContact(contact));
-                new Thread(() -> AppDatabase.getInstance(getActivity()).blockedContactDao().insertAll(blockedContacts)).start();
+                new Thread(() -> {
+                    AppDatabase.getInstance(getActivity()).blockedContactDao().insertAll(blockedContacts);
+                    refreshBlockedContacts();
+                }).start();
             }
         }
     }
@@ -96,8 +103,10 @@ public class SettingsFragment extends ListFragment implements View.OnClickListen
         DefaultSharedPreferenceManager.setForwardMissedCalls(getActivity(), isChecked);
     }
 
-    private class BlockedContactTask extends AsyncTask<Void, Void, List<BlockedContact>> {
 
+    public void refreshBlockedContacts(){ new BlockedContactTask().execute(); }
+
+    private class BlockedContactTask extends AsyncTask<Void, Void, List<BlockedContact>> {
         private HashMap<String, String> contactNameMap = new HashMap<>();
 
         @Override
@@ -109,8 +118,10 @@ public class SettingsFragment extends ListFragment implements View.OnClickListen
 
         @Override
         protected void onPostExecute(List<BlockedContact> blockedContacts) {
-            BlockedContactAdapter adapter = new BlockedContactAdapter(getActivity(), R.layout.contact_list_item, blockedContacts, contactNameMap);
-            setListAdapter(adapter);
+            BlockedContactAdapter adapter = new BlockedContactAdapter(blockedContacts, contactNameMap);
+            RecyclerView recyclerViewBlockedContacts = getView().findViewById(R.id.recyclerViewBlockedContacts);
+            recyclerViewBlockedContacts.setAdapter(adapter);
+            recyclerViewBlockedContacts.setLayoutManager(new LinearLayoutManager(getActivity()));
         }
     }
 
