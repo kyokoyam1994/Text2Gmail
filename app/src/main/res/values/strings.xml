@@ -51,9 +51,7 @@
     <string name="blocked_contacts_from_book_text">From Contacts</string>
 
     <string name="blocked_contacts_manual_dialog_text">Please enter a phone number to block:</string>
-    <string name="email_fragment_dialog_prompt_text">Please enter your e-mail address:</string>
-    <string name="email_fragment_dialog_invalid_address_text">Not a valid email address</string>
-    <string name="email_fragment_dialog_not_gmail_text">Please enter a valid Gmail address</string>
+    <string name="blocked_contacts_manual_dialog_error_text">Please enter a valid phone number.</string>
 
     //Misc Strings
     <string name="search">Search</string>

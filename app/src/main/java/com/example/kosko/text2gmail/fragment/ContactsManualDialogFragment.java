@@ -6,9 +6,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialogFragment;
+import android.telephony.PhoneNumberUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.example.kosko.text2gmail.R;
 
@@ -27,13 +30,26 @@ public class ContactsManualDialogFragment extends AppCompatDialogFragment {
 
         builder.setTitle("Blocked Contact")
             .setView(view)
-            .setNegativeButton("Cancel", (dialog, which) -> {})
-            .setPositiveButton("OK", (dialog, which) -> {
-                Intent intent = new Intent();
-                intent.putExtra(BLOCKED_CONTACT_MANUAL_KEY, editTextEmailAddress.getText().toString());
-                getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, intent);
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("OK", null);
+        AlertDialog dialog = builder.create();
+
+        //Override positive button to prevent closing
+        dialog.setOnShowListener(dialogInterface -> {
+            Button b = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            b.setOnClickListener(view1 -> {
+                TextView textViewErrorMessage = view.findViewById(R.id.textViewErrorMessage);
+                if (PhoneNumberUtils.isGlobalPhoneNumber(editTextEmailAddress.getText().toString())) {
+                    textViewErrorMessage.setText("");
+                    Intent intent = new Intent();
+                    intent.putExtra(BLOCKED_CONTACT_MANUAL_KEY, editTextEmailAddress.getText().toString());
+                    getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, intent);
+                    dismiss();
+                } else textViewErrorMessage.setText(R.string.blocked_contacts_manual_dialog_error_text);
             });
-        return builder.create();
+        });
+
+        return dialog;
     }
 
     public static ContactsManualDialogFragment newInstance(){

@@ -54,16 +54,16 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_CONTACT_MANUAL) {
+        ArrayList<BlockedContact> blockedContacts = new ArrayList<>();
+        if (requestCode == RC_CONTACT_MANUAL && resultCode == Activity.RESULT_OK && data != null) {
             String blockedNumber = data.getStringExtra(ContactsManualDialogFragment.BLOCKED_CONTACT_MANUAL_KEY);
-        } else if(requestCode == RC_CONTACT_FROM_BOOK) {
+            blockedContacts.add(new BlockedContact(blockedNumber));
+            insertBlockedContacts(blockedContacts);
+        } else if(requestCode == RC_CONTACT_FROM_BOOK && resultCode == Activity.RESULT_OK && data != null) {
             //Handle Contact From Book
-            if (resultCode == Activity.RESULT_OK && data != null) {
-                ArrayList<String> selectedContacts = data.getStringArrayListExtra(ContactSelectionActivity.SELECTED_CONTACTS_LIST);
-                ArrayList<BlockedContact> blockedContacts = new ArrayList<>();
-                for (String contact : selectedContacts) blockedContacts.add(new BlockedContact(contact));
-                insertBlockedContacts(blockedContacts);
-            }
+            ArrayList<String> selectedContacts = data.getStringArrayListExtra(ContactSelectionActivity.SELECTED_CONTACTS_LIST);
+            for (String contact : selectedContacts) blockedContacts.add(new BlockedContact(contact));
+            insertBlockedContacts(blockedContacts);
         }
     }
 
@@ -137,12 +137,18 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
                 Cursor cursor = contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, new String[]{ContactsContract.Contacts._ID, ContactsContract.Contacts.PHOTO_THUMBNAIL_URI},
                         ContactsContract.CommonDataKinds.Phone.NUMBER + " = ?", new String[]{contact.getBlockedNumber()}, null);
 
-                if(cursor != null && cursor.moveToFirst())
-                {
+                if(cursor != null && cursor.moveToFirst()) {
                     contactImageMap.put(contact.getBlockedNumber(), cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_THUMBNAIL_URI)));
                     cursor.close();
                 }
             }
+
+            blockedContacts.sort((blockedContact, blockedContact2) -> {
+                String name = contactNameMap.get(blockedContact.getBlockedNumber()) == null ?  "Unknown" : contactNameMap.get(blockedContact.getBlockedNumber());
+                String name2 = contactNameMap.get(blockedContact2.getBlockedNumber()) == null ? "Unknown" : contactNameMap.get(blockedContact2.getBlockedNumber());
+                if (name.compareTo(name2) == 0) return blockedContact.getBlockedNumber().compareTo(blockedContact2.getBlockedNumber());
+                else return name.compareTo(name2);
+            });
             return blockedContacts;
         }
 

@@ -12,7 +12,6 @@ import android.util.Log;
 import com.example.kosko.text2gmail.database.entity.LogEntry;
 import com.example.kosko.text2gmail.receiver.SMSMissedCallBroadcastReceiver;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -23,6 +22,7 @@ public class Util {
     public static String findContactNameByNumber(Context context, String phoneNumber){
         String contactName = null;
         ContentResolver contentResolver = context.getContentResolver();
+        Log.d("TEST", phoneNumber);
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
         Cursor cursor = contentResolver.query(uri, new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
         if(cursor != null && cursor.moveToFirst()){
