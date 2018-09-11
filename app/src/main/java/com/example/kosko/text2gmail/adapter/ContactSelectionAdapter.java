@@ -4,7 +4,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,7 +49,6 @@ public class ContactSelectionAdapter extends CursorAdapter implements View.OnCli
 
 
         String image = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
-        Log.d("TEST", "TEST IMAGE: " + image);
         if (image != null) {
             try {
                 imageViewContactPhoto.setImageURI(Uri.parse(image));

@@ -14,7 +14,6 @@ import com.example.kosko.text2gmail.fragment.MessageLogFragment;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 import com.example.kosko.text2gmail.util.Util;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -49,7 +48,7 @@ public class EmailIntentService extends IntentService {
 
             for (BlockedContact contact : blockedContacts) {
                 if (PhoneNumberUtils.compare(contact.getBlockedNumber(), senderNumber)){
-                    Log.d(TAG, senderNumber + "is blocked, ignoring...");
+                    Log.d(TAG, senderNumber + " is blocked, ignoring...");
                     return;
                 }
             }

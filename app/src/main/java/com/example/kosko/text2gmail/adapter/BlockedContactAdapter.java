@@ -1,10 +1,13 @@
 package com.example.kosko.text2gmail.adapter;
 
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.kosko.text2gmail.R;
@@ -15,28 +18,46 @@ import java.util.List;
 
 public class BlockedContactAdapter extends RecyclerView.Adapter<BlockedContactAdapter.ViewHolder> {
 
-    private HashMap<String, String> contactNameMap;
-    private List<BlockedContact> blockedContacts;
+    public interface BlockedContactListener {
+        void onBlockedContactDeleted(BlockedContact blockedContact);
+    }
 
-    public BlockedContactAdapter(List<BlockedContact> blockedContacts, HashMap<String, String> contactNameMap) {
+    private BlockedContactListener blockedContactListener;
+    private List<BlockedContact> blockedContacts;
+    private HashMap<String, String> contactNameMap;
+    private HashMap<String, String> contactImageMap;
+
+    public BlockedContactAdapter(BlockedContactListener blockedContactListener, List<BlockedContact> blockedContacts, HashMap<String, String> contactNameMap, HashMap<String, String> contactImageMap) {
+        this.blockedContactListener = blockedContactListener;
         this.blockedContacts = blockedContacts;
         this.contactNameMap = contactNameMap;
+        this.contactImageMap = contactImageMap;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.contact_list_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.blocked_contact_list_item, parent, false);
         ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        holder.getButtonDeleteBlockedContact().setOnClickListener(holder);
         BlockedContact contact = blockedContacts.get(position);
         String contactName = contactNameMap.get(contact.getBlockedNumber());
         holder.getTextViewPhoneNumber().setText(contact.getBlockedNumber());
         holder.getTextViewContactName().setText(contactName == null ? "Unknown" : contactName);
+
+        String image = contactImageMap.get(contact.getBlockedNumber());
+        if (image != null) {
+            try {
+                holder.getImageViewContactPhoto().setImageURI(Uri.parse(image));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -44,30 +65,43 @@ public class BlockedContactAdapter extends RecyclerView.Adapter<BlockedContactAd
         return blockedContacts.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView textViewPhoneNumber;
         private TextView textViewContactName;
+        private ImageButton buttonDeleteBlockedContact;
+        private ImageView imageViewContactPhoto;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             textViewPhoneNumber = itemView.findViewById(R.id.textViewPhoneNumber);
             textViewContactName = itemView.findViewById(R.id.textViewContactName);
+            buttonDeleteBlockedContact = itemView.findViewById(R.id.buttonDeleteBlockedContact);
+            imageViewContactPhoto = itemView.findViewById(R.id.imageViewContactPhoto);
         }
 
         public TextView getTextViewPhoneNumber() {
             return textViewPhoneNumber;
         }
 
-        public void setTextViewPhoneNumber(TextView textViewPhoneNumber) {
-            this.textViewPhoneNumber = textViewPhoneNumber;
-        }
-
         public TextView getTextViewContactName() {
             return textViewContactName;
         }
 
-        public void setTextViewContactName(TextView textViewContactName) {
-            this.textViewContactName = textViewContactName;
+        public ImageButton getButtonDeleteBlockedContact() {
+            return buttonDeleteBlockedContact;
+        }
+
+        public ImageView getImageViewContactPhoto() {
+            return imageViewContactPhoto;
+        }
+
+        @Override
+        public void onClick(View view) {
+            switch (view.getId()) {
+                case R.id.buttonDeleteBlockedContact:
+                    blockedContactListener.onBlockedContactDeleted(blockedContacts.get(getAdapterPosition()));
+                    break;
+            }
         }
     }
 

@@ -36,10 +36,7 @@ import com.example.kosko.text2gmail.util.Constants;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 import com.example.kosko.text2gmail.util.Util;
 
-import java.time.DayOfWeek;
-import java.time.format.TextStyle;
 import java.util.Calendar;
-import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
 

@@ -8,12 +8,10 @@ import android.content.Context;
 
 import com.example.kosko.text2gmail.database.dao.BlockedContactDao;
 import com.example.kosko.text2gmail.database.dao.LogEntryDao;
-import com.example.kosko.text2gmail.database.dao.UserEmailDao;
 import com.example.kosko.text2gmail.database.entity.BlockedContact;
 import com.example.kosko.text2gmail.database.entity.LogEntry;
-import com.example.kosko.text2gmail.database.entity.UserEmail;
 
-@Database(entities = {BlockedContact.class, LogEntry.class, UserEmail.class}, version = 1)
+@Database(entities = {BlockedContact.class, LogEntry.class}, version = 1)
 @TypeConverters({DatabaseTypeConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -21,7 +19,6 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract BlockedContactDao blockedContactDao();
     public abstract LogEntryDao logEntryDao();
-    public abstract UserEmailDao userEmailDao();
 
     public static AppDatabase getInstance(Context context){
         if(instance == null){
