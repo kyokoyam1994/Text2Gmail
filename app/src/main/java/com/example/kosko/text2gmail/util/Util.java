@@ -39,7 +39,6 @@ public class Util {
         return state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
     }
 
-
     public static List<LogEntry> sortLogEntriesByContactName(Context context, List<LogEntry> logEntries){
         TreeMap<String, ArrayList<LogEntry>> contactEntryMap = new TreeMap<>();
         for (LogEntry entry : logEntries) {

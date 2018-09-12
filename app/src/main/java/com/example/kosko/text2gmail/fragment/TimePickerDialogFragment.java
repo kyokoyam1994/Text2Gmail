@@ -15,9 +15,6 @@ import com.example.kosko.text2gmail.R;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -52,16 +49,6 @@ public class TimePickerDialogFragment extends AppCompatDialogFragment{
         int title = getArguments().getInt(TITLE_KEY);
         String time = getArguments().getString(TIME_KEY);
         timePickerSchedule = view.findViewById(R.id.timePickerSchedule);
-
-        /*try {
-            DateTimeFormatter parseFormat = new DateTimeFormatterBuilder().appendPattern("h:mma").toFormatter();
-            LocalTime localTime = LocalTime.parse(time, parseFormat);
-            timePickerSchedule.setHour(localTime.getHour());
-            timePickerSchedule.setMinute(localTime.getMinute());
-        } catch (Exception e) {
-            timePickerSchedule.setHour(0);
-            timePickerSchedule.setMinute(0);
-        }*/
 
         try {
             DateFormat format = new SimpleDateFormat("h:mma");
