@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="8dp"
+    app:cardElevation="8dp">
+
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/textViewDayOfWeek"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="Monday"
+            android:textAppearance="@android:style/TextAppearance.Material.Large"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textViewHeaderStartTime"
+            android:layout_width="wrap_content"
+            android:layout_height="15dp"
+            android:text="Start"
+            app:layout_constraintBottom_toTopOf="@+id/textViewDayOfWeek"
+            app:layout_constraintEnd_toStartOf="@+id/textViewScheduledStartTime"
+            app:layout_constraintTop_toTopOf="@+id/textViewDayOfWeek" />
+
+        <TextView
+            android:id="@+id/textViewScheduledStartTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="9:00 AM"
+            app:layout_constraintBottom_toBottomOf="@+id/textViewDayOfWeek"
+            app:layout_constraintEnd_toStartOf="@+id/textViewHeaderEndTime" />
+
+        <TextView
+            android:id="@+id/textViewHeaderEndTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="End"
+            app:layout_constraintBaseline_toBaselineOf="@+id/textViewHeaderStartTime"
+            app:layout_constraintEnd_toStartOf="@+id/textViewScheduledEndTime" />
+
+        <TextView
+            android:id="@+id/textViewScheduledEndTime"
+            android:layout_width="wrap_content"
+            android:layout_height="17dp"
+            android:layout_marginEnd="16dp"
+            android:text="5:00 PM"
+            app:layout_constraintBaseline_toBaselineOf="@+id/textViewScheduledStartTime"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </android.support.constraint.ConstraintLayout>
+</android.support.v7.widget.CardView>

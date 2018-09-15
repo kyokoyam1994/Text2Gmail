@@ -51,13 +51,16 @@ public class BlockedContactAdapter extends RecyclerView.Adapter<BlockedContactAd
         holder.getTextViewContactName().setText(contactName == null ? "Unknown" : contactName);
 
         String image = contactImageMap.get(contact.getBlockedNumber());
+        boolean invalidURI = true;
         if (image != null) {
             try {
                 holder.getImageViewContactPhoto().setImageURI(Uri.parse(image));
+                invalidURI = false;
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        if(invalidURI) holder.getImageViewContactPhoto().setImageResource(R.drawable.unknown_user_icon);
     }
 
     @Override

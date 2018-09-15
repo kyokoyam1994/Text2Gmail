@@ -47,15 +47,17 @@ public class ContactSelectionAdapter extends CursorAdapter implements View.OnCli
         textViewContactName.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY)));
         textViewPhoneNumber.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)));
 
-
         String image = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_THUMBNAIL_URI));
+        boolean invalidURI = true;
         if (image != null) {
             try {
                 imageViewContactPhoto.setImageURI(Uri.parse(image));
+                invalidURI = false;
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        if(invalidURI) imageViewContactPhoto.setImageResource(R.drawable.unknown_user_icon);
     }
 
     @Override
