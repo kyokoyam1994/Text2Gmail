@@ -71,7 +71,9 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
     public void onFocusChange(View view, boolean hasFocus) {
         switch (view.getId()){
             case R.id.editTextStartTime:
-                if(hasFocus) TimePickerDialogFragment.newInstance(R.string.start_time_label_text, editTextStartTime.getText().toString()).show(getSupportFragmentManager(), "Start");
+                if(hasFocus) {
+                    TimePickerDialogFragment.newInstance(R.string.start_time_label_text, editTextStartTime.getText().toString()).show(getSupportFragmentManager(), "Start");
+                }
                 break;
             case R.id.editTextEndTime:
                 if(hasFocus) TimePickerDialogFragment.newInstance(R.string.end_time_label_text, editTextEndTime.getText().toString()).show(getSupportFragmentManager(), "End");

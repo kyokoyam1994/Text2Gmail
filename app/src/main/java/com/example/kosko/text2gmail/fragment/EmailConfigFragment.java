@@ -43,7 +43,6 @@ import static android.app.Activity.RESULT_OK;
 public class EmailConfigFragment extends Fragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
     private static final String TAG = EmailConfigFragment.class.getName();
-    private final String SCOPE = Constants.GMAIL_COMPOSE + " " + Constants.GMAIL_MODIFY + " " + Constants.MAIL_GOOGLE_COM;
 
     private ScheduleStatusBroadcastReceiver scheduleStatusBroadcastReceiver;
     public final static String SCHEDULE_STATUS_INTENT = "SCHEDULE_STATUS_INTENT";
@@ -113,12 +112,12 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             if (requestCode == AUTHORIZATION_CODE) {
-                requestToken();
+                Util.requestToken(getActivity(), new EmailConfigFragment.OnTokenAcquired());
             } else if (requestCode == ACCOUNT_CODE) {
                 String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
                 DefaultSharedPreferenceManager.setUserEmail(getActivity(), accountName);
-                invalidateToken();
-                requestToken();
+                Util.invalidateToken(getActivity());
+                Util.requestToken(getActivity(), new EmailConfigFragment.OnTokenAcquired());
             }
         }
     }
@@ -233,25 +232,6 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
             String scheduledTime = DefaultSharedPreferenceManager.getSchedule(getActivity(), DefaultSharedPreferenceManager.DAY_OF_THE_WEEK_KEYS[dayOfWeek == 1 ? 6 : dayOfWeek - 2]);
             labelScheduleTime.setText(dayOfTheWeekEnum.getName() + ", " + scheduledTime);
         } else labelScheduleTime.setText(getResources().getString(R.string.label_schedule_time_off_text));
-    }
-
-    private void invalidateToken() {
-        AccountManager accountManager = AccountManager.get(getActivity());
-        accountManager.invalidateAuthToken("com.google", DefaultSharedPreferenceManager.getUserToken(getActivity()));
-        DefaultSharedPreferenceManager.setUserToken(getActivity(), null);
-    }
-
-    private void requestToken() {
-        Account userAccount = null;
-        AccountManager accountManager = AccountManager.get(getActivity());
-        String user = DefaultSharedPreferenceManager.getUserEmail(getActivity());
-        for (Account account : accountManager.getAccountsByType("com.google")) {
-            if (account.name.equals(user)) {
-                userAccount = account;
-                break;
-            }
-        }
-        accountManager.getAuthToken(userAccount, "oauth2:" + SCOPE, null, getActivity(), new OnTokenAcquired(), null);
     }
 
     private class OnTokenAcquired implements AccountManagerCallback<Bundle> {

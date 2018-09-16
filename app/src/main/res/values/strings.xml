@@ -49,6 +49,7 @@
     <string name="blocked_contacts_text">Blocked Contacts</string>
     <string name="blocked_contacts_manual_text">Manual</string>
     <string name="blocked_contacts_from_book_text">From Contacts</string>
+    <string name="label_empty_blocked_contacts_text">There are currently no blocked contacts</string>
 
     <string name="blocked_contacts_manual_dialog_text">Please enter a phone number to block:</string>
     <string name="blocked_contacts_manual_dialog_error_text">Please enter a valid phone number.</string>

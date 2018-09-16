@@ -1,7 +1,15 @@
 package com.example.kosko.text2gmail;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 
+import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
+import com.example.kosko.text2gmail.util.Util;
 import com.sun.mail.smtp.SMTPTransport;
 import com.sun.mail.util.BASE64EncoderStream;
 
@@ -9,6 +17,7 @@ import java.util.Properties;
 import javax.activation.DataHandler;
 import javax.mail.Authenticator;
 import javax.mail.Message;
+import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.URLName;
 import javax.mail.internet.InternetAddress;
@@ -18,7 +27,12 @@ import javax.mail.util.ByteArrayDataSource;
 public class GMailSender extends Authenticator {
 
     private static final String TAG = GMailSender.class.getName();
+    private Context context;
     private Session session;
+
+    public GMailSender (Context context) {
+        this.context = context;
+    }
 
     public SMTPTransport connectToSmtp(String host, int port, String userEmail, String oauthToken, boolean debug) throws Exception {
         Log.v(TAG, "came to connecttosmtp");
@@ -43,7 +57,23 @@ public class GMailSender extends Authenticator {
         Log.v(TAG, "came to call issuecommand " + transport.isConnected());
         Log.v(TAG , new String(response));
 
-        transport.issueCommand("AUTH XOAUTH2 " + new String(response), 235);
+        try {
+            transport.issueCommand("AUTH XOAUTH2 " + new String(response), 235);
+        } catch (MessagingException e) {
+            //Try again after renewing authentication token
+            Log.e(TAG, "Exception", e);
+            Util.invalidateToken(context);
+            AccountManagerFuture<Bundle> future = Util.requestToken(context, null);
+            Bundle result = future.getResult();
+            if (future.isDone() && !future.isCancelled() && result.getString(AccountManager.KEY_AUTHTOKEN) != null) {
+                DefaultSharedPreferenceManager.setUserToken(context, result.getString(AccountManager.KEY_AUTHTOKEN));
+                transport.issueCommand("AUTH XOAUTH2 " + new String(response), 235);
+                Log.d("TEST", "RENEWED AUTH TOKEN!");
+            } else {
+                throw new Exception();
+            }
+        }
+
         return transport;
     }
 
@@ -59,4 +89,5 @@ public class GMailSender extends Authenticator {
         message.setRecipient(Message.RecipientType.TO, new InternetAddress(recipients));
         smtpTransport.sendMessage(message, message.getAllRecipients());
     }
+
 }

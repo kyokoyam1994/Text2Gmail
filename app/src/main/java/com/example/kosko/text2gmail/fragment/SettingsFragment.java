@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.TextView;
 
 import com.example.kosko.text2gmail.ContactSelectionActivity;
 import com.example.kosko.text2gmail.R;
@@ -124,6 +125,18 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
 
     public void refreshBlockedContacts() { new BlockedContactTask().execute(); }
 
+    private void toggleBlockedContactsView () {
+        RecyclerView recyclerViewBlockedContacts = getView().findViewById(R.id.recyclerViewBlockedContacts);
+        TextView textViewEmptyBlockedContacts = getView().findViewById(R.id.textViewEmptyBlockedContacts);
+        if (recyclerViewBlockedContacts.getAdapter().getItemCount() > 0) {
+            textViewEmptyBlockedContacts.setVisibility(View.INVISIBLE);
+            recyclerViewBlockedContacts.setVisibility(View.VISIBLE);
+        } else {
+            textViewEmptyBlockedContacts.setVisibility(View.VISIBLE);
+            recyclerViewBlockedContacts.setVisibility(View.INVISIBLE);
+        }
+    }
+
     private class BlockedContactTask extends AsyncTask<Void, Void, List<BlockedContact>> {
         private HashMap<String, String> contactNameMap = new HashMap<>();
         private HashMap<String, String> contactImageMap = new HashMap<>();
@@ -158,6 +171,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
             RecyclerView recyclerViewBlockedContacts = getView().findViewById(R.id.recyclerViewBlockedContacts);
             recyclerViewBlockedContacts.setAdapter(adapter);
             recyclerViewBlockedContacts.setLayoutManager(new LinearLayoutManager(getActivity()));
+            toggleBlockedContactsView();
         }
     }
 

@@ -1,11 +1,17 @@
 package com.example.kosko.text2gmail.util;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.util.Log;
 
@@ -18,6 +24,8 @@ import java.util.List;
 import java.util.TreeMap;
 
 public class Util {
+
+    private static final String SCOPE = Constants.GMAIL_COMPOSE + " " + Constants.GMAIL_MODIFY + " " + Constants.MAIL_GOOGLE_COM;
 
     public static String findContactNameByNumber(Context context, String phoneNumber){
         String contactName = null;
@@ -59,5 +67,27 @@ public class Util {
         }
         return newLogEntries;
     }
+
+    public static void invalidateToken(Context context) {
+        AccountManager accountManager = AccountManager.get(context);
+        accountManager.invalidateAuthToken("com.google", DefaultSharedPreferenceManager.getUserToken(context));
+        DefaultSharedPreferenceManager.setUserToken(context, null);
+    }
+
+    public static AccountManagerFuture<Bundle> requestToken(Context context, AccountManagerCallback<Bundle> callback) {
+        Account userAccount = null;
+        AccountManager accountManager = AccountManager.get(context);
+        String user = DefaultSharedPreferenceManager.getUserEmail(context);
+        for (Account account : accountManager.getAccountsByType("com.google")) {
+            if (account.name.equals(user)) {
+                userAccount = account;
+                break;
+            }
+        }
+
+        if (context instanceof Activity) return accountManager.getAuthToken(userAccount, "oauth2:" + SCOPE, null, (Activity) context, callback, null);
+        else return accountManager.getAuthToken(userAccount, "oauth2:" + SCOPE, null, true, callback, null);
+    }
+
 
 }
