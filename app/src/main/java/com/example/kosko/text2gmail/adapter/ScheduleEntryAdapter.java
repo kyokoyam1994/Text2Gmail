@@ -25,7 +25,7 @@ public class ScheduleEntryAdapter extends ArrayAdapter<ScheduleEntry> {
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         View v = convertView;
         if(v == null) {
-            v = LayoutInflater.from(getContext()).inflate(R.layout.schedule_list_item, parent, false);
+            v = LayoutInflater.from(getContext()).inflate(R.layout.card_view_schedule, parent, false);
         }
 
         ScheduleEntry entry = getItem(position);

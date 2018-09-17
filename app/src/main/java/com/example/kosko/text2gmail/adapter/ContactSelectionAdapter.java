@@ -67,7 +67,6 @@ public class ContactSelectionAdapter extends CursorAdapter implements View.OnCli
                 View parentRow = (View) view.getParent();
                 TextView textViewPhoneNumber = parentRow.findViewById(R.id.textViewPhoneNumber);
                 contactAddedListener.onContactAdded(textViewPhoneNumber.getText().toString());
-                //Refresh contacts
                 break;
         }
     }

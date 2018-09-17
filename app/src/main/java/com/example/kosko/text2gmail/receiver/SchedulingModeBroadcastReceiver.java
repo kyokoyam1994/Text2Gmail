@@ -14,9 +14,6 @@ import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -73,22 +70,6 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
         int keyPos = dayOfWeek == 1 ? 6 : dayOfWeek - 2;
         String schedule = DefaultSharedPreferenceManager.getSchedule(context, DefaultSharedPreferenceManager.DAY_OF_THE_WEEK_KEYS[keyPos]);
         String[] intervals = schedule.split("~");
-
-        /*DateTimeFormatter parseFormat = new DateTimeFormatterBuilder().appendPattern("h:mma").toFormatter();
-        LocalTime localTime = LocalTime.parse(intervals[0], parseFormat);
-        LocalTime localTime2 = LocalTime.parse(intervals[1], parseFormat);
-        Calendar c = (Calendar) curr.clone();
-        Calendar c2 = (Calendar) curr.clone();
-
-        c.set(Calendar.HOUR_OF_DAY, localTime.getHour());
-        c.set(Calendar.MINUTE, localTime.getMinute());
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
-
-        c2.set(Calendar.HOUR_OF_DAY, localTime2.getHour());
-        c2.set(Calendar.MINUTE, localTime2.getMinute());
-        c2.set(Calendar.SECOND, 0);
-        c2.set(Calendar.MILLISECOND, 0);*/
 
         Calendar c = (Calendar) curr.clone();
         Calendar c2 = (Calendar) curr.clone();

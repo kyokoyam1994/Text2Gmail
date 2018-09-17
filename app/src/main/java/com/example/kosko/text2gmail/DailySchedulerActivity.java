@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -22,7 +23,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class DailySchedulerActivity extends AppCompatActivity implements View.OnClickListener,
-        View.OnFocusChangeListener, TimePickerDialogFragment.TimeSelectedListener {
+        TimePickerDialogFragment.TimeSelectedListener {
 
     private Button buttonApply;
     private Button buttonOK;
@@ -41,8 +42,8 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
 
         buttonApply.setOnClickListener(this);
         buttonOK.setOnClickListener(this);
-        editTextStartTime.setOnFocusChangeListener(this);
-        editTextEndTime.setOnFocusChangeListener(this);
+        editTextStartTime.setOnClickListener(this);
+        editTextEndTime.setOnClickListener(this);
 
         Calendar curr = Calendar.getInstance();
         int dayOfWeek = curr.get(Calendar.DAY_OF_WEEK);
@@ -64,28 +65,17 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
             case R.id.buttonOK:
                 finish();
                 break;
-        }
-    }
-
-    @Override
-    public void onFocusChange(View view, boolean hasFocus) {
-        switch (view.getId()){
             case R.id.editTextStartTime:
-                if(hasFocus) {
-                    TimePickerDialogFragment.newInstance(R.string.start_time_label_text, editTextStartTime.getText().toString()).show(getSupportFragmentManager(), "Start");
-                }
+                TimePickerDialogFragment.newInstance(R.string.start_time_label_text, editTextStartTime.getText().toString()).show(getSupportFragmentManager(), "Start");
                 break;
             case R.id.editTextEndTime:
-                if(hasFocus) TimePickerDialogFragment.newInstance(R.string.end_time_label_text, editTextEndTime.getText().toString()).show(getSupportFragmentManager(), "End");
+                TimePickerDialogFragment.newInstance(R.string.end_time_label_text, editTextEndTime.getText().toString()).show(getSupportFragmentManager(), "End");
                 break;
         }
     }
 
     @Override
     public void onTimeSelected(int title, int hours, int minutes, boolean cancelled) {
-        // DateTimeFormatter parseFormat = new DateTimeFormatterBuilder().appendPattern("h:mma").toFormatter();
-        // String time = parseFormat.format(LocalTime.of(hours, minutes));
-
         DateFormat parseFormat = new SimpleDateFormat("h:mma");
         Calendar curr = Calendar.getInstance();
         curr.set(Calendar.HOUR_OF_DAY, hours);
@@ -102,32 +92,24 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
     }
 
     private void refreshSchedule() {
-        ListView listViewSchedule = findViewById(R.id.listViewSchedule);
+        //ListView listViewSchedule = findViewById(R.id.listViewSchedule);
         ArrayList<ScheduleEntry> entries = new ArrayList<>();
         for (int i = 0; i < DefaultSharedPreferenceManager.DAY_OF_THE_WEEK_KEYS.length; i++) {
             String schedule = DefaultSharedPreferenceManager.getSchedule(this, DefaultSharedPreferenceManager.DAY_OF_THE_WEEK_KEYS[i]);
             String[] intervals = schedule.split("~");
             entries.add(new ScheduleEntry(ScheduleEntry.DayOfTheWeek.from(i+1), intervals[0], intervals[1]));
         }
-        ScheduleEntryAdapter scheduleEntryAdapter = new ScheduleEntryAdapter(this, R.layout.schedule_list_item, entries);
-        listViewSchedule.setAdapter(scheduleEntryAdapter);
+        ScheduleEntryAdapter scheduleEntryAdapter = new ScheduleEntryAdapter(this, R.layout.card_view_schedule, entries);
+        //listViewSchedule.setAdapter(scheduleEntryAdapter);
+        LinearLayout linearLayoutSchedule = findViewById(R.id.linearLayoutSchedule);
+        linearLayoutSchedule.removeAllViews();
+        for(int i = 0; i < scheduleEntryAdapter.getCount(); i++) {
+            linearLayoutSchedule.addView(scheduleEntryAdapter.getView(i, null, null));
+        }
     }
 
     private void applySelection(){
         TextView textViewScheduleErrorMessage = findViewById(R.id.textViewScheduleErrorMessage);
-        /*try {
-            DateTimeFormatter parseFormat = new DateTimeFormatterBuilder().appendPattern("h:mma").toFormatter();
-            LocalTime startTime = LocalTime.parse(editTextStartTime.getText().toString(), parseFormat);
-            LocalTime endTime = LocalTime.parse(editTextEndTime.getText().toString(), parseFormat);
-            if (!endTime.isAfter(startTime)) {
-                textViewScheduleErrorMessage.setText(R.string.time_picker_dialog_fragment_end_not_after_start);
-                return;
-            }
-        } catch (DateTimeParseException e) {
-            textViewScheduleErrorMessage.setText(R.string.time_picker_dialog_fragment_invalid_time);
-            return;
-        }*/
-
         try {
             DateFormat format = new SimpleDateFormat("h:mma");
             Date startTime = format.parse(editTextStartTime.getText().toString());

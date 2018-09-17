@@ -1,8 +1,6 @@
 package com.example.kosko.text2gmail;
 
-import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.content.Context;
 import android.os.Bundle;

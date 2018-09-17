@@ -32,7 +32,6 @@ import com.example.kosko.text2gmail.R;
 import com.example.kosko.text2gmail.ScheduleEntry;
 import com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver;
 import com.example.kosko.text2gmail.receiver.SMSMissedCallBroadcastReceiver;
-import com.example.kosko.text2gmail.util.Constants;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 import com.example.kosko.text2gmail.util.Util;
 
