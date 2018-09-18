@@ -193,7 +193,6 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         DefaultSharedPreferenceManager.setSchedulingMode(getActivity(), isChecked);
         Switch switchServiceStatus = getView().findViewById(R.id.switchServiceStatus);
 
-        //Potentially leaking activity here! Find some other context to pass
         if(isChecked) SchedulingModeBroadcastReceiver.startAlarm(getActivity());
         else SchedulingModeBroadcastReceiver.cancelAlarm(getActivity());
         updateStatusCircle(getView(), switchServiceStatus.isChecked());

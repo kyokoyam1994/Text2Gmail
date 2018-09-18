@@ -26,11 +26,15 @@ import java.util.List;
 
 public class MessageLogFragment extends ListFragment implements View.OnClickListener{
 
-    private static final String CLEAR_OPERATION = "CLEAR_OPERATION";
     public static final String REFRESH_INTENT = "REFRESH_INTENT";
 
     private LogUpdateBroadcastReceiver logUpdateBroadcastReceiver;
     private Spinner spinnerSortLog;
+
+    private enum LogEntryOperation {
+        REFRESH,
+        CLEAR
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -66,31 +70,36 @@ public class MessageLogFragment extends ListFragment implements View.OnClickList
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.buttonClearLog:
-                clearLog(v);
+                clearLog();
                 break;
         }
     }
 
-    public void clearLog(View v){
-        new LogEntryTask().execute(CLEAR_OPERATION);
+    public void clearLog(){
+        new LogEntryTask(LogEntryOperation.CLEAR).execute();
     }
 
     public void refreshLog(){
-        new LogEntryTask().execute();
+        new LogEntryTask(LogEntryOperation.REFRESH).execute();
     }
 
-    private class LogEntryTask extends AsyncTask<String, Void, List<LogEntry>> {
+    private class LogEntryTask extends AsyncTask<Void, Void, List<LogEntry>> {
+        private LogEntryOperation operation;
         private String sortOption = spinnerSortLog.getSelectedItem().toString();
         private HashMap<String, String> contactNameMap = new HashMap<>();
 
+        public LogEntryTask(LogEntryOperation operation) {
+            this.operation = operation;
+        }
+
         @Override
-        protected List<LogEntry> doInBackground(String... strings) {
-            if(strings.length > 0 && CLEAR_OPERATION.equals(strings[0])) {
+        protected List<LogEntry> doInBackground(Void... voids) {
+            if(operation == LogEntryOperation.CLEAR) {
                 AppDatabase.getInstance(getActivity()).logEntryDao().deleteAll();
             }
 
             List<LogEntry> entries;
-            if (sortOption.equals(getString(R.string.sender))) {
+            if (sortOption.equals(getResources().getString(R.string.sender))) {
                 entries = Util.sortLogEntriesByContactName(getActivity(), AppDatabase.getInstance(getActivity()).logEntryDao().getAllBySender());
             } else {
                 entries = AppDatabase.getInstance(getActivity()).logEntryDao().getAllByTimestamp();

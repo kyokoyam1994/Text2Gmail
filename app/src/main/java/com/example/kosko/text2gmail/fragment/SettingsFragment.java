@@ -27,6 +27,7 @@ import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 import com.example.kosko.text2gmail.util.Util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -35,6 +36,12 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
 
     private static final int RC_CONTACT_MANUAL = 101;
     private static final int RC_CONTACT_FROM_BOOK = 201;
+
+    private enum BlockedContactOperation {
+        REFRESH,
+        DELETE,
+        INSERT
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -48,8 +55,13 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
         checkBoxMissedCalls.setOnCheckedChangeListener(this);
         buttonBlockContactsManual.setOnClickListener(this);
         buttonBlockContactsFromBook.setOnClickListener(this);
-        refreshBlockedContacts();
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshBlockedContacts();
     }
 
     @Override
@@ -61,7 +73,6 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
             blockedContacts.add(new BlockedContact(blockedNumber));
             insertBlockedContacts(blockedContacts);
         } else if(requestCode == RC_CONTACT_FROM_BOOK && resultCode == Activity.RESULT_OK && data != null) {
-            //Handle Contact From Book
             ArrayList<String> selectedContacts = data.getStringArrayListExtra(ContactSelectionActivity.SELECTED_CONTACTS_LIST);
             for (String contact : selectedContacts) blockedContacts.add(new BlockedContact(contact));
             insertBlockedContacts(blockedContacts);
@@ -110,20 +121,14 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
     }
 
     public void insertBlockedContacts(ArrayList<BlockedContact> blockedContacts) {
-        new Thread(() -> {
-            AppDatabase.getInstance(getActivity()).blockedContactDao().insertAll(blockedContacts);
-            refreshBlockedContacts();
-        }).start();
+        new BlockedContactTask(BlockedContactOperation.INSERT, blockedContacts).execute();
     }
 
     public void deleteBlockedContact(BlockedContact blockedContact) {
-        new Thread(() -> {
-            AppDatabase.getInstance(getActivity()).blockedContactDao().delete(blockedContact);
-            refreshBlockedContacts();
-        }).start();
+        new BlockedContactTask(BlockedContactOperation.DELETE, new ArrayList<>(Arrays.asList(new BlockedContact[]{blockedContact}))).execute();
     }
 
-    public void refreshBlockedContacts() { new BlockedContactTask().execute(); }
+    public void refreshBlockedContacts() { new BlockedContactTask(BlockedContactOperation.REFRESH, null).execute(); }
 
     private void toggleBlockedContactsView () {
         RecyclerView recyclerViewBlockedContacts = getView().findViewById(R.id.recyclerViewBlockedContacts);
@@ -138,11 +143,22 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
     }
 
     private class BlockedContactTask extends AsyncTask<Void, Void, List<BlockedContact>> {
+        private BlockedContactOperation operation;
+        private ArrayList<BlockedContact> blockedContacts;
         private HashMap<String, String> contactNameMap = new HashMap<>();
         private HashMap<String, String> contactImageMap = new HashMap<>();
 
+        public BlockedContactTask(BlockedContactOperation operation, ArrayList<BlockedContact> blockedContacts){
+            this.operation = operation;
+            this.blockedContacts = blockedContacts;
+        }
+
         @Override
         protected List<BlockedContact> doInBackground(Void... voids) {
+
+            if (operation == BlockedContactOperation.INSERT) AppDatabase.getInstance(getActivity()).blockedContactDao().insertAll(blockedContacts);
+            else if (operation == BlockedContactOperation.DELETE) AppDatabase.getInstance(getActivity()).blockedContactDao().deleteAll(blockedContacts);
+
             List<BlockedContact> blockedContacts = AppDatabase.getInstance(getActivity()).blockedContactDao().getAll();
             for (BlockedContact contact : blockedContacts) {
                 contactNameMap.put(contact.getBlockedNumber(), Util.findContactNameByNumber(getActivity(), contact.getBlockedNumber()));

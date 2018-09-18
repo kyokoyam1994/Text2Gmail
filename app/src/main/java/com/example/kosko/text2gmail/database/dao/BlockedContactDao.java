@@ -8,6 +8,7 @@ import android.arch.persistence.room.Query;
 
 import com.example.kosko.text2gmail.database.entity.BlockedContact;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +27,7 @@ public interface BlockedContactDao {
     @Delete
     void delete(BlockedContact blockedContact);
 
-    @Query("DELETE FROM BlockedContact")
-    void deleteAll();
+    @Delete
+    void deleteAll(ArrayList<BlockedContact> blockedContacts);
 
 }

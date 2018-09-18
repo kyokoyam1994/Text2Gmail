@@ -53,18 +53,20 @@ public class EmailIntentService extends IntentService {
                 }
             }
 
-            String senderName = Util.findContactNameByNumber(this, senderNumber);
+            String temp = Util.findContactNameByNumber(this, senderNumber);
+            String senderName = (temp == null ? senderNumber : temp);
             String emailSubject;
             String emailBody;
+
             switch (intent.getStringExtra(EMAIL_TYPE)) {
                 case EMAIL_TYPE_SMS:
-                    emailSubject = "New SMS Received From " + (senderName == null ? senderNumber : senderName);
-                    emailBody = smsContents;
+                    emailSubject = "[Text2Gmail] You've got a new text from " + senderName + "!";
+                    emailBody = constructSMSReceivedBody(senderName, smsContents, smsDateReceived);
                     break;
                 case EMAIL_TYPE_MISSED_CALL:
-                    emailSubject = "Missed Call From " + (senderName == null ? senderNumber : senderName);
-                    emailBody = "Call received on " + new Date(smsDateReceived).toString();
-                    smsContents = emailSubject;
+                    emailSubject = "[Text2Gmail] You missed a call from " + senderName + "!";
+                    emailBody = constructMissedCallBody(senderName, smsDateReceived);
+                    smsContents = "Missed call from " + senderName;
                     break;
                 default:
                     return;
@@ -84,6 +86,20 @@ public class EmailIntentService extends IntentService {
             AppDatabase.getInstance(getApplicationContext()).logEntryDao().insert(entry);
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(MessageLogFragment.REFRESH_INTENT));
         }
+    }
+
+    private String constructSMSReceivedBody(String sender, String message, long timestamp){
+        return new StringBuilder().append(sender)
+                .append(" said...\n\n")
+                .append(message)
+                .append("\n\nSent at ")
+                .append(new Date(timestamp).toString()).toString();
+    }
+
+    private String constructMissedCallBody(String sender, long timestamp){
+        return new StringBuilder().append(sender)
+                .append(" called you at ")
+                .append(new Date(timestamp).toString()).toString();
     }
 
 }
