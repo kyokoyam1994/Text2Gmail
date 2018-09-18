@@ -45,8 +45,8 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, ALARM_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         SchedulingModeQueryResult queryResult = querySchedule(context);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, queryResult.getNextScheduledTime(), pendingIntent);
-        //alarmManager.setExact(AlarmManager.RTC_WAKEUP, queryResult.getNextScheduledTime(), pendingIntent);
+        //alarmManager.set(AlarmManager.RTC_WAKEUP, queryResult.getNextScheduledTime(), pendingIntent);
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, queryResult.getNextScheduledTime(), pendingIntent);
         LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(EmailConfigFragment.SCHEDULE_STATUS_INTENT));
     }
 
