@@ -54,6 +54,11 @@
     <string name="blocked_contacts_manual_dialog_text">Please enter a phone number to block:</string>
     <string name="blocked_contacts_manual_dialog_error_text">Please enter a valid phone number.</string>
 
+
+    //Contact Selection
+    <string name="button_add_contact_state_unadded_text">Add</string>
+    <string name="button_add_contact_state_added_text">Added</string>
+
     //Misc Strings
     <string name="search">Search</string>
 </resources>
