@@ -1,21 +1,26 @@
 package com.example.kosko.text2gmail;
 
-import android.accounts.AccountManager;
-import android.accounts.AccountManagerFuture;
 import android.content.Context;
-import android.os.Bundle;
 import android.util.Log;
 
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
-import com.example.kosko.text2gmail.util.Util;
 import com.sun.mail.smtp.SMTPTransport;
 import com.sun.mail.util.BASE64EncoderStream;
 
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Properties;
 import javax.activation.DataHandler;
 import javax.mail.Authenticator;
 import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.URLName;
 import javax.mail.internet.InternetAddress;
@@ -55,28 +60,62 @@ public class GMailSender extends Authenticator {
         Log.v(TAG, "came to call issuecommand " + transport.isConnected());
         Log.v(TAG , new String(response));
 
-        try {
-            transport.issueCommand("AUTH XOAUTH2 " + new String(response), 235);
-        } catch (MessagingException e) {
-            //Try again after renewing authentication token
-            Log.e(TAG, "Exception", e);
-            Util.invalidateToken(context);
-            AccountManagerFuture<Bundle> future = Util.requestToken(context, null);
-            Bundle result = future.getResult();
-            if (future.isDone() && !future.isCancelled() && result.getString(AccountManager.KEY_AUTHTOKEN) != null) {
-                DefaultSharedPreferenceManager.setUserToken(context, result.getString(AccountManager.KEY_AUTHTOKEN));
-                transport.issueCommand("AUTH XOAUTH2 " + new String(response), 235);
-                Log.d("TEST", "RENEWED AUTH TOKEN!");
-            } else {
-                throw new Exception();
-            }
-        }
-
+        transport.issueCommand("AUTH XOAUTH2 " + new String(response), 235);
         return transport;
     }
 
-    public synchronized void sendMail(String subject, String body, String user, String oauthToken, String recipients) throws Exception {
-        SMTPTransport smtpTransport = connectToSmtp("smtp.gmail.com", 587, user, oauthToken, true);
+    private boolean refreshAccessToken() {
+        HttpURLConnection connection = null;
+        try {
+            URL endpoint = new URL("https://www.googleapis.com/oauth2/v4/token");
+            connection = (HttpURLConnection) endpoint.openConnection();
+            connection.setRequestMethod("POST");
+
+            String dataParams = "&client_id=" + BuildConfig.Client_Id +
+                    "&client_secret=" + BuildConfig.Secret_Id +
+                    "&refresh_token=" + DefaultSharedPreferenceManager.getUserRefreshToken(context) +
+                    "&grant_type=refresh_token";
+
+            OutputStream os = connection.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+            writer.append(dataParams);
+            writer.flush();
+            writer.close();
+            os.close();
+
+            connection.connect();
+            int responseCode = connection.getResponseCode();
+            if(responseCode == HttpURLConnection.HTTP_OK){
+                InputStream inputStream = connection.getInputStream();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+                String jsonString = "";
+                String line;
+                while ((line = bufferedReader.readLine()) != null) jsonString += line;
+
+                JSONObject jsonObject = new JSONObject(jsonString);
+                String accessToken = jsonObject.getString("access_token");
+                if(accessToken != null){
+                    DefaultSharedPreferenceManager.setUserAccessToken(context, accessToken);
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public synchronized void sendMail(String subject, String body, String user, String recipients) throws Exception {
+        SMTPTransport smtpTransport = null;
+        try {
+            smtpTransport = connectToSmtp("smtp.gmail.com", 587, user, DefaultSharedPreferenceManager.getUserAccessToken(context), true);
+        } catch (Exception ex) {
+            //Refresh access token and try again
+            Log.d(TAG, "Initial SMTP connection failed, refreshing accessing token...");
+            refreshAccessToken();
+            smtpTransport = connectToSmtp("smtp.gmail.com", 587, user, DefaultSharedPreferenceManager.getUserAccessToken(context), true);
+        }
 
         MimeMessage message = new MimeMessage(session);
         DataHandler handler = new DataHandler(new ByteArrayDataSource(body.getBytes(), "text/plain"));

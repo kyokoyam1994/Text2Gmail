@@ -11,7 +11,13 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+        debug {
+            buildConfigField "String", "Client_Id", Text2Gmail_ClientId
+            buildConfigField "String", "Secret_Id", Text2Gmail_SecretId
+        }
         release {
+            buildConfigField "String", "Client_Id", Text2Gmail_ClientId
+            buildConfigField "String", "Secret_Id", Text2Gmail_SecretId
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

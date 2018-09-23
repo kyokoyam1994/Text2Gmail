@@ -74,9 +74,9 @@ public class EmailIntentService extends IntentService {
 
             boolean sendSuccess = true;
             try {
+                Log.d(TAG, DefaultSharedPreferenceManager.getUserEmail(this));
                 GMailSender sender = new GMailSender(this);
-                sender.sendMail(emailSubject, emailBody, DefaultSharedPreferenceManager.getUserEmail(this),
-                        DefaultSharedPreferenceManager.getUserToken(this), DefaultSharedPreferenceManager.getUserEmail(this));
+                sender.sendMail(emailSubject, emailBody, DefaultSharedPreferenceManager.getUserEmail(this), DefaultSharedPreferenceManager.getUserEmail(this));
             } catch (Exception e) {
                 Log.e(TAG, "Exception", e);
                 sendSuccess = false;

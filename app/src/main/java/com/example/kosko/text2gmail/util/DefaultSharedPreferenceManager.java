@@ -10,7 +10,8 @@ public class DefaultSharedPreferenceManager {
 
     // Properties
     private static final String USER_EMAIL_KEY = "USER_EMAIL_KEY";
-    private static final String USER_TOKEN_KEY = "USER_TOKEN_KEY";
+    private static final String USER_ACCESS_TOKEN_KEY = "USER_ACCESS_TOKEN_KEY";
+    private static final String USER_REFRESH_TOKEN_KEY = "USER_REFRESH_TOKEN_KEY";
     private static final String SCHEDULING_MODE_KEY = "SCHEDULING_MODE_KEY";
     private static final String FORWARD_MISSED_CALLS_KEY = "FORWARD_MISSED_CALLS_KEY";
 
@@ -40,13 +41,23 @@ public class DefaultSharedPreferenceManager {
         editor.commit();
     }
 
-    public static String getUserToken (Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context).getString(USER_TOKEN_KEY, null);
+    public static String getUserAccessToken(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(USER_ACCESS_TOKEN_KEY, null);
     }
 
-    public static void setUserToken (Context context, String newValue) {
+    public static void setUserAccessToken(Context context, String newValue) {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-        editor.putString(USER_TOKEN_KEY, newValue);
+        editor.putString(USER_ACCESS_TOKEN_KEY, newValue);
+        editor.commit();
+    }
+
+    public static String getUserRefreshToken(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context).getString(USER_REFRESH_TOKEN_KEY, null);
+    }
+
+    public static void setUserRefreshToken(Context context, String newValue) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putString(USER_REFRESH_TOKEN_KEY, newValue);
         editor.commit();
     }
 

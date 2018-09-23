@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.example.kosko.text2gmail.EmailIntentService;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
+import com.example.kosko.text2gmail.util.Util;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,14 +30,12 @@ public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Bundle extras = intent.getExtras();
-        String userEmail = DefaultSharedPreferenceManager.getUserEmail(context);
-        String token = DefaultSharedPreferenceManager.getUserToken(context);
         boolean forwardMissedCalls = DefaultSharedPreferenceManager.getForwardMissedCalls(context);
         boolean schedulingMode = DefaultSharedPreferenceManager.getSchedulingMode(context);
         SchedulingModeBroadcastReceiver.SchedulingModeQueryResult queryResult = SchedulingModeBroadcastReceiver.querySchedule(context);
         boolean currentlyScheduled = queryResult.isCurrScheduled();
 
-        if (userEmail == null || token == null) {
+        if (!Util.isAccountConfigured(context)) {
             Log.d(TAG, "Email is not configured!");
         } else if (schedulingMode && !currentlyScheduled) {
             Log.d(TAG, "Not currently scheduled!");
