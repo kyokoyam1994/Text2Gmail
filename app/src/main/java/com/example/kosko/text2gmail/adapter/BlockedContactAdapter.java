@@ -74,7 +74,7 @@ public class BlockedContactAdapter extends RecyclerView.Adapter<BlockedContactAd
         private ImageButton buttonDeleteBlockedContact;
         private ImageView imageViewContactPhoto;
 
-        public ViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
             textViewPhoneNumber = itemView.findViewById(R.id.textViewPhoneNumber);
             textViewContactName = itemView.findViewById(R.id.textViewContactName);

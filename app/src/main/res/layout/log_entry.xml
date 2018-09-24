@@ -2,7 +2,6 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -12,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
-        android:text="Sender"
+        android:text="@string/log_entry_sender_text_view_text"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -23,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:layout_marginTop="8dp"
-        android:text="Message"
+        android:text="@string/log_entry_message_text_view_text"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/logEntrySenderTextView"
         app:layout_constraintTop_toBottomOf="@+id/logEntrySenderTextView"
@@ -34,7 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
-        android:text="Date Received"
+        android:text="@string/log_entry_date_received_text_view_text"
         app:layout_constraintBaseline_toBaselineOf="@+id/logEntrySenderTextView"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -42,7 +41,7 @@
         android:id="@+id/logEntrySendSuccessful"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Send Successful"
+        android:text="@string/log_entry_send_successful_view_text"
         app:layout_constraintBaseline_toBaselineOf="@+id/logEntryMessageTextView"
         app:layout_constraintEnd_toEndOf="@+id/logEntryDateTextView" />
 </android.support.constraint.ConstraintLayout>

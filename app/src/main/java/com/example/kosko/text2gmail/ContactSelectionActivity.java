@@ -25,7 +25,7 @@ public class ContactSelectionActivity extends AppCompatActivity implements Conta
 
     public final static String SELECTED_CONTACTS_LIST = "SELECTED_CONTACTS_LIST";
     private final static String SEARCH_TEXT = "SEARCH_TEXT";
-    public final static String[] CONTACTS_PROJECTION = {ContactsContract.Contacts._ID,
+    private final static String[] CONTACTS_PROJECTION = {ContactsContract.Contacts._ID,
                                                         ContactsContract.Contacts.DISPLAY_NAME_PRIMARY,
                                                         ContactsContract.Contacts.PHOTO_THUMBNAIL_URI,
                                                         ContactsContract.CommonDataKinds.Phone.NUMBER};
@@ -92,7 +92,6 @@ public class ContactSelectionActivity extends AppCompatActivity implements Conta
             }
         });
         searchView.setQuery(searchViewText, true);
-
         return true;
     }
 
@@ -121,7 +120,7 @@ public class ContactSelectionActivity extends AppCompatActivity implements Conta
         }
     }
 
-    public void setActivityResult(boolean cancelled) {
+    private void setActivityResult(boolean cancelled) {
         if (cancelled) setResult(Activity.RESULT_CANCELED);
         else {
             Intent resultIntent = new Intent();
@@ -131,7 +130,7 @@ public class ContactSelectionActivity extends AppCompatActivity implements Conta
         finish();
     }
 
-    private void addChip(String contactNumber){
+    private void addChip(String contactNumber) {
         Chip chip = new Chip(this);
         chip.setChipText(contactNumber);
         chip.setCloseIconEnabled(true);
@@ -140,13 +139,13 @@ public class ContactSelectionActivity extends AppCompatActivity implements Conta
         chipGroupSelectedContacts.addView(chip);
     }
 
-    private void removeChip(View view, String contactNumber){
+    private void removeChip(View view, String contactNumber) {
         blockedContactsList.remove(contactNumber);
         ((ViewGroup) view.getParent()).removeView(view);
         contactSelectionAdapter.notifyDataSetChanged();
     }
 
-    private Cursor queryContacts(String input){
+    private Cursor queryContacts(String input) {
         String queryString = "%" + input + "%";
         ContentResolver contentResolver = getContentResolver();
         return contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, CONTACTS_PROJECTION,

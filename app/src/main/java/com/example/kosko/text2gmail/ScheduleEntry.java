@@ -3,7 +3,7 @@ package com.example.kosko.text2gmail;
 public class ScheduleEntry {
 
     //Alternative to DayOfWeek enum for Android SDK versions that don't have access to Java 8
-    public enum DayOfTheWeek{
+    public enum DayOfTheWeek {
         MONDAY (1, "Monday"),
         TUESDAY (2, "Tuesday"),
         WEDNESDAY (3, "Wednesday"),
@@ -15,7 +15,7 @@ public class ScheduleEntry {
         private int value;
         private String name;
 
-        private DayOfTheWeek(int value, String name){
+        DayOfTheWeek(int value, String name) {
             this.value = value;
             this.name = name;
         }
@@ -28,7 +28,7 @@ public class ScheduleEntry {
             return name;
         }
 
-        public static DayOfTheWeek from(int value){
+        public static DayOfTheWeek from(int value) {
             switch (value) {
                 case 1:
                     return MONDAY;
@@ -63,23 +63,18 @@ public class ScheduleEntry {
     public DayOfTheWeek getDayOfTheWeek() {
         return dayOfTheWeek;
     }
-
     public void setDayOfTheWeek(DayOfTheWeek dayOfWeek) {
         this.dayOfTheWeek = dayOfWeek;
     }
-
     public String getStartTime() {
         return startTime;
     }
-
     public void setStartTime(String startTime) {
         this.startTime = startTime;
     }
-
     public String getEndTime() {
         return endTime;
     }
-
     public void setEndTime(String endTime) {
         this.endTime = endTime;
     }

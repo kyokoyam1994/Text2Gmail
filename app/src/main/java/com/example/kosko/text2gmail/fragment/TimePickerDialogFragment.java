@@ -19,7 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class TimePickerDialogFragment extends AppCompatDialogFragment{
+public class TimePickerDialogFragment extends AppCompatDialogFragment {
 
     private static final String TITLE_KEY = "TITLE_KEY";
     private static final String TIME_KEY = "TIME_KEY";
@@ -94,7 +94,7 @@ public class TimePickerDialogFragment extends AppCompatDialogFragment{
         outState.putInt(MINUTE_KEY, timePickerSchedule.getMinute());
     }
 
-    public static TimePickerDialogFragment newInstance(int title, String time){
+    public static TimePickerDialogFragment newInstance(int title, String time) {
         TimePickerDialogFragment instance = new TimePickerDialogFragment();
         Bundle args = new Bundle();
         args.putInt(TITLE_KEY, title);

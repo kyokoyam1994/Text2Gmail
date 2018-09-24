@@ -54,7 +54,7 @@ public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
             }
 
             Iterator<String> iterator = messageMap.keySet().iterator();
-            while (iterator.hasNext()){
+            while (iterator.hasNext()) {
                 String address = iterator.next();
                 ArrayList<SmsMessage> messageList = messageMap.get(address);
                 String message = concatSMSMessages(messageList);
@@ -114,13 +114,13 @@ public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
     }
 
     //Method operates on the assumption that all messages in the list come from the same sender
-    private String concatSMSMessages(ArrayList<SmsMessage> messageList){
+    private String concatSMSMessages(ArrayList<SmsMessage> messageList) {
         StringBuilder builder = new StringBuilder();
         for (SmsMessage message : messageList) builder.append(message.getMessageBody());
         return builder.toString();
     }
 
-    private void startEmailService(Context context, String emailType, String senderNumber, String contents, long dateReceived){
+    private void startEmailService(Context context, String emailType, String senderNumber, String contents, long dateReceived) {
         Intent emailIntent = new Intent(context, EmailIntentService.class);
         emailIntent.putExtra(EmailIntentService.EMAIL_TYPE, emailType);
         emailIntent.putExtra(EmailIntentService.SMS_SENDER_NUMBER, senderNumber);

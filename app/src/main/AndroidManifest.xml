@@ -79,7 +79,5 @@
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
             </intent-filter>
         </receiver>
-
     </application>
-
 </manifest>

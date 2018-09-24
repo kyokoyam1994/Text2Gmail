@@ -24,7 +24,7 @@ import com.example.kosko.text2gmail.util.Util;
 import java.util.HashMap;
 import java.util.List;
 
-public class MessageLogFragment extends ListFragment implements View.OnClickListener{
+public class MessageLogFragment extends ListFragment implements View.OnClickListener {
 
     public static final String REFRESH_INTENT = "REFRESH_INTENT";
 
@@ -75,11 +75,11 @@ public class MessageLogFragment extends ListFragment implements View.OnClickList
         }
     }
 
-    public void clearLog(){
+    private void clearLog(){
         new LogEntryTask(LogEntryOperation.CLEAR).execute();
     }
 
-    public void refreshLog(){
+    private void refreshLog(){
         new LogEntryTask(LogEntryOperation.REFRESH).execute();
     }
 
@@ -88,7 +88,7 @@ public class MessageLogFragment extends ListFragment implements View.OnClickList
         private String sortOption = spinnerSortLog.getSelectedItem().toString();
         private HashMap<String, String> contactNameMap = new HashMap<>();
 
-        public LogEntryTask(LogEntryOperation operation) {
+        LogEntryTask(LogEntryOperation operation) {
             this.operation = operation;
         }
 
@@ -116,7 +116,7 @@ public class MessageLogFragment extends ListFragment implements View.OnClickList
         }
     }
 
-    private class LogUpdateBroadcastReceiver extends BroadcastReceiver{
+    private class LogUpdateBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             refreshLog();

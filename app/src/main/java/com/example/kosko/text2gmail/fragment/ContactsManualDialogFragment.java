@@ -25,12 +25,12 @@ public class ContactsManualDialogFragment extends AppCompatDialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.contacts_manual_dialog_fragment, null);
+        View inflatedView = inflater.inflate(R.layout.contacts_manual_dialog_fragment, null);
 
-        editTextEmailAddress = view.findViewById(R.id.editTextBlockedContact);
+        editTextEmailAddress = inflatedView.findViewById(R.id.editTextBlockedContact);
 
         builder.setTitle("Blocked Contact")
-            .setView(view)
+            .setView(inflatedView)
             .setNegativeButton("Cancel", null)
             .setPositiveButton("OK", null);
 
@@ -42,8 +42,8 @@ public class ContactsManualDialogFragment extends AppCompatDialogFragment {
             Button buttonNegative = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
             buttonPositive.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
             buttonNegative.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
-            buttonPositive.setOnClickListener(view1 -> {
-                TextView textViewErrorMessage = view.findViewById(R.id.textViewErrorMessage);
+            buttonPositive.setOnClickListener(view -> {
+                TextView textViewErrorMessage = inflatedView.findViewById(R.id.textViewErrorMessage);
                 if (PhoneNumberUtils.isGlobalPhoneNumber(editTextEmailAddress.getText().toString())) {
                     textViewErrorMessage.setText("");
                     Intent intent = new Intent();

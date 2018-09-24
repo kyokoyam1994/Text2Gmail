@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.PhoneNumberUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.kosko.text2gmail.database.AppDatabase;
 import com.example.kosko.text2gmail.database.entity.BlockedContact;
@@ -78,6 +79,7 @@ public class EmailIntentService extends IntentService {
                 GMailSender sender = new GMailSender(this);
                 sender.sendMail(emailSubject, emailBody, DefaultSharedPreferenceManager.getUserEmail(this), DefaultSharedPreferenceManager.getUserEmail(this));
             } catch (Exception e) {
+                Toast.makeText(this, "Could not send e-mail", Toast.LENGTH_SHORT);
                 Log.e(TAG, "Exception", e);
                 sendSuccess = false;
             }
@@ -88,7 +90,7 @@ public class EmailIntentService extends IntentService {
         }
     }
 
-    private String constructSMSReceivedBody(String sender, String message, long timestamp){
+    private String constructSMSReceivedBody(String sender, String message, long timestamp) {
         return new StringBuilder().append(sender)
                 .append(" said...\n\n")
                 .append(message)
@@ -96,7 +98,7 @@ public class EmailIntentService extends IntentService {
                 .append(new Date(timestamp).toString()).toString();
     }
 
-    private String constructMissedCallBody(String sender, long timestamp){
+    private String constructMissedCallBody(String sender, long timestamp) {
         return new StringBuilder().append(sender)
                 .append(" called you at ")
                 .append(new Date(timestamp).toString()).toString();

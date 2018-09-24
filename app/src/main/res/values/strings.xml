@@ -49,7 +49,12 @@
     <string-array name="sort_options">
         <item>@string/date_received</item>
         <item>@string/sender</item>
-    </string-array>>
+    </string-array>
+
+    <string name="log_entry_sender_text_view_text">Sender</string>
+    <string name="log_entry_message_text_view_text">Message</string>
+    <string name="log_entry_date_received_text_view_text">Date Received</string>
+    <string name="log_entry_send_successful_view_text">Send Successful</string>
 
     //Settings Strings
     <string name="missed_calls_text">Forward Missed Calls</string>
@@ -67,5 +72,4 @@
 
     //Misc Strings
     <string name="search">Search</string>
-
 </resources>

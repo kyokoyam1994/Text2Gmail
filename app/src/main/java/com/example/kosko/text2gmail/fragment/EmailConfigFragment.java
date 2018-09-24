@@ -11,7 +11,6 @@ import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -25,12 +24,15 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import com.example.kosko.text2gmail.BuildConfig;
 import com.example.kosko.text2gmail.DailySchedulerActivity;
 import com.example.kosko.text2gmail.R;
 import com.example.kosko.text2gmail.ScheduleEntry;
+import com.example.kosko.text2gmail.database.AppDatabase;
+import com.example.kosko.text2gmail.database.entity.RefreshToken;
 import com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver;
 import com.example.kosko.text2gmail.receiver.SMSMissedCallBroadcastReceiver;
 import com.example.kosko.text2gmail.util.Constants;
@@ -55,6 +57,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -66,7 +69,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
 
     private ScheduleStatusBroadcastReceiver scheduleStatusBroadcastReceiver;
     private GoogleSignInOptions gso;
-    private GoogleSignInClient gsoClient;
+    private GoogleSignInClient gsClient;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -76,7 +79,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
                 .requestServerAuthCode(BuildConfig.Client_Id)
                 .requestEmail()
                 .build();
-        gsoClient = GoogleSignIn.getClient(getActivity(), gso);
+        gsClient = GoogleSignIn.getClient(getActivity(), gso);
 
         Button setScheduleButton = view.findViewById(R.id.setScheduleButton);
         Switch switchServiceStatus = view.findViewById(R.id.switchServiceStatus);
@@ -169,20 +172,20 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         }
     }
 
-    public void configureSchedule() {
+    private void configureSchedule() {
         Intent intent = new Intent(getActivity(), DailySchedulerActivity.class);
         startActivity(intent);
     }
 
-    public void promptEmail() {
-        Task<Void> task = gsoClient.signOut();
+    private void promptEmail() {
+        Task<Void> task = gsClient.signOut();
         task.addOnSuccessListener(getActivity(), aVoid -> {
-            Intent intent = gsoClient.getSignInIntent();
+            Intent intent = gsClient.getSignInIntent();
             startActivityForResult(intent, ACCOUNT_CODE);
         });
     }
 
-    public void updateConfiguredEmail(View view) {
+    private void updateConfiguredEmail(View view) {
         if (Util.isAccountConfigured(getActivity())) {
             TextView labelConfiguredEmailAddress = view.findViewById(R.id.labelConfiguredEmailAddress);
             ViewSwitcher viewSwitcher = view.findViewById(R.id.viewSwitcher);
@@ -193,7 +196,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         }
     }
 
-    public void deleteConfiguredEmail(View view) {
+    private void deleteConfiguredEmail(View view) {
         DefaultSharedPreferenceManager.setUserEmail(getActivity(), null);
         DefaultSharedPreferenceManager.setUserAccessToken(getActivity(), null);
         DefaultSharedPreferenceManager.setUserRefreshToken(getActivity(), null);
@@ -206,7 +209,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         }
     }
 
-    public void toggleServiceStatus(boolean isChecked) {
+    private void toggleServiceStatus(boolean isChecked) {
         PackageManager packageManager = getActivity().getPackageManager();
         ComponentName componentName = new ComponentName(getActivity(), SMSMissedCallBroadcastReceiver.class);
         int state = PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
@@ -215,7 +218,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         updateStatusCircle(getView(), isChecked);
     }
 
-    public void toggleSchedulingMode(boolean isChecked) {
+    private void toggleSchedulingMode(boolean isChecked) {
         DefaultSharedPreferenceManager.setSchedulingMode(getActivity(), isChecked);
         Switch switchServiceStatus = getView().findViewById(R.id.switchServiceStatus);
 
@@ -258,7 +261,6 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         } else labelScheduleTime.setText(getResources().getString(R.string.label_schedule_time_off_text));
     }
 
-
     private class AuthTokenTask extends AsyncTask<Void, Void, Boolean> {
         private Intent data;
         public AuthTokenTask(Intent data) {
@@ -293,7 +295,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
 
                 connection.connect();
                 int responseCode = connection.getResponseCode();
-                if(responseCode == HttpURLConnection.HTTP_OK){
+                if(responseCode == HttpURLConnection.HTTP_OK) {
                     InputStream inputStream = connection.getInputStream();
                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
                     String jsonString = "";
@@ -301,35 +303,45 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
                     while ((line = bufferedReader.readLine()) != null) jsonString += line;
 
                     JSONObject jsonObject = new JSONObject(jsonString);
+                    String accessToken = null;
+                    String refreshToken = null;
                     Log.d(TAG, jsonString);
 
-                    String accessToken = jsonObject.getString("access_token");
-                    String refreshToken = jsonObject.getString("refresh_token");
+                    if(jsonObject.has("access_token")) accessToken = jsonObject.getString("access_token");
+
+                    if(jsonObject.has("refresh_token")) refreshToken = jsonObject.getString("refresh_token");
+                    else {
+                        List<RefreshToken> token = AppDatabase.getInstance(getActivity()).refreshTokenDao().getRefreshTokenByEmail(account.getEmail());
+                        if(!token.isEmpty()) refreshToken = token.get(0).getRefreshToken();
+                    }
+
                     if(account.getEmail() != null && accessToken != null && refreshToken != null) {
                         DefaultSharedPreferenceManager.setUserEmail(getActivity(), account.getEmail());
                         DefaultSharedPreferenceManager.setUserAccessToken(getActivity(), accessToken);
                         DefaultSharedPreferenceManager.setUserRefreshToken(getActivity(), refreshToken);
+                        AppDatabase.getInstance(getActivity()).refreshTokenDao().insert(new RefreshToken(account.getEmail(), refreshToken));
                         Log.d(TAG, "SUCCESS!!");
                         success = true;
                     }
-                }else Log.d("TAG", String.valueOf(responseCode));
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
                 if (connection != null) connection.disconnect();
-                Log.d(TAG, "REVOKING");
-                //gsoClient.signOut();
-                gsoClient.revokeAccess().addOnCompleteListener(revokeTask -> gsoClient.signOut());
             }
             return success;
         }
 
         @Override
         protected void onPostExecute(Boolean success) {
+            gsClient.signOut();
             if (success) {
                 updateConfiguredEmail(getView());
                 updateStatusCircle(getView(), Util.isSMSMissedCallBroadcastReceiverOn(getActivity()));
-            } else deleteConfiguredEmail(getView());
+            } else {
+                Toast.makeText(getActivity(), "Could not sign in", Toast.LENGTH_SHORT).show();
+                //deleteConfiguredEmail(getView());
+            }
         }
     }
 

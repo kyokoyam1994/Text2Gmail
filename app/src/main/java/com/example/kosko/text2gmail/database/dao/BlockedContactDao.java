@@ -8,7 +8,6 @@ import android.arch.persistence.room.Query;
 
 import com.example.kosko.text2gmail.database.entity.BlockedContact;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -7,7 +7,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.kosko.text2gmail.adapter.ScheduleEntryAdapter;
@@ -108,7 +107,7 @@ public class DailySchedulerActivity extends AppCompatActivity implements View.On
         }
     }
 
-    private void applySelection(){
+    private void applySelection() {
         TextView textViewScheduleErrorMessage = findViewById(R.id.textViewScheduleErrorMessage);
         try {
             DateFormat format = new SimpleDateFormat("h:mma");

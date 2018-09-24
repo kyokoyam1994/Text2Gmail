@@ -8,10 +8,12 @@ import android.content.Context;
 
 import com.example.kosko.text2gmail.database.dao.BlockedContactDao;
 import com.example.kosko.text2gmail.database.dao.LogEntryDao;
+import com.example.kosko.text2gmail.database.dao.RefreshTokenDao;
 import com.example.kosko.text2gmail.database.entity.BlockedContact;
 import com.example.kosko.text2gmail.database.entity.LogEntry;
+import com.example.kosko.text2gmail.database.entity.RefreshToken;
 
-@Database(entities = {BlockedContact.class, LogEntry.class}, version = 1)
+@Database(entities = {BlockedContact.class, LogEntry.class, RefreshToken.class}, version = 1)
 @TypeConverters({DatabaseTypeConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -19,6 +21,7 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract BlockedContactDao blockedContactDao();
     public abstract LogEntryDao logEntryDao();
+    public abstract RefreshTokenDao refreshTokenDao();
 
     public static AppDatabase getInstance(Context context){
         if(instance == null){

@@ -20,7 +20,7 @@ import java.util.Date;
 public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
 
     private static final String TAG = SchedulingModeBroadcastReceiver.class.getName();
-    public static final int ALARM_CODE = 301;
+    private static final int ALARM_CODE = 301;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -64,7 +64,7 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
             PendingIntent.FLAG_NO_CREATE) != null);
     }
 
-    public static SchedulingModeQueryResult querySchedule(Context context){
+    public static SchedulingModeQueryResult querySchedule(Context context) {
         Calendar curr = Calendar.getInstance();
         int dayOfWeek = curr.get(Calendar.DAY_OF_WEEK);
         int keyPos = dayOfWeek == 1 ? 6 : dayOfWeek - 2;
@@ -116,11 +116,10 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
     }
 
     public static class SchedulingModeQueryResult {
-
         private boolean isCurrScheduled;
         private long nextScheduledTime;
 
-        public SchedulingModeQueryResult(boolean isCurrScheduled, long nextScheduledTime) {
+        SchedulingModeQueryResult(boolean isCurrScheduled, long nextScheduledTime) {
             this.isCurrScheduled = isCurrScheduled;
             this.nextScheduledTime = nextScheduledTime;
         }
@@ -128,7 +127,6 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
         public boolean isCurrScheduled() {
             return isCurrScheduled;
         }
-
         public long getNextScheduledTime() {
             return nextScheduledTime;
         }

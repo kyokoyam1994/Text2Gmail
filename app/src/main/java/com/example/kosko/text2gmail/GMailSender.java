@@ -6,6 +6,7 @@ import android.util.Log;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 import com.sun.mail.smtp.SMTPTransport;
 import com.sun.mail.util.BASE64EncoderStream;
+import com.sun.mail.util.MailConnectException;
 
 import org.json.JSONObject;
 
@@ -21,6 +22,7 @@ import java.util.Properties;
 import javax.activation.DataHandler;
 import javax.mail.Authenticator;
 import javax.mail.Message;
+import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.URLName;
 import javax.mail.internet.InternetAddress;
@@ -33,11 +35,15 @@ public class GMailSender extends Authenticator {
     private Context context;
     private Session session;
 
+    /*static {
+        Security.addProvider(new JSSEProvider());
+    }*/
+
     public GMailSender (Context context) {
         this.context = context;
     }
 
-    public SMTPTransport connectToSmtp(String host, int port, String userEmail, String oauthToken, boolean debug) throws Exception {
+    private SMTPTransport connectToSmtp(String host, int port, String userEmail, String oauthToken, boolean debug) throws Exception {
         Log.v(TAG, "came to connecttosmtp");
 
         Properties props = new Properties();
@@ -50,6 +56,7 @@ public class GMailSender extends Authenticator {
 
         final URLName unusedUrlName = null;
         SMTPTransport transport = new SMTPTransport(session, unusedUrlName);
+
         // If the password is non-null, SMTP tries to do AUTH LOGIN.
         final String emptyPassword = null;
         transport.connect(host, port, userEmail, emptyPassword);
@@ -110,7 +117,10 @@ public class GMailSender extends Authenticator {
         SMTPTransport smtpTransport = null;
         try {
             smtpTransport = connectToSmtp("smtp.gmail.com", 587, user, DefaultSharedPreferenceManager.getUserAccessToken(context), true);
-        } catch (Exception ex) {
+        } catch (MailConnectException ex) {
+            //ConnectException may occur here, possibly due to firewall issues
+            Log.d(TAG, "Could not connect to SMTP, perhaps the firewall is blocking the connection...");
+        } catch (MessagingException ex) {
             //Refresh access token and try again
             Log.d(TAG, "Initial SMTP connection failed, refreshing accessing token...");
             refreshAccessToken();
