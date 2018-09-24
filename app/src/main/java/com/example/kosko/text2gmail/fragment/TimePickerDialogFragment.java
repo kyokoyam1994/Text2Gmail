@@ -3,10 +3,12 @@ package com.example.kosko.text2gmail.fragment;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TimePicker;
 
 import com.example.kosko.text2gmail.R;
@@ -73,7 +75,16 @@ public class TimePickerDialogFragment extends AppCompatDialogFragment{
             .setView(view)
             .setNegativeButton("Cancel", (dialog, which) -> timeSelectedListener.onTimeSelected(title, timePickerSchedule.getHour(), timePickerSchedule.getMinute(), true))
             .setPositiveButton("OK", (dialog, which) -> timeSelectedListener.onTimeSelected(title, timePickerSchedule.getHour(), timePickerSchedule.getMinute(), false));
-        return builder.create();
+
+        AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(dialogInterface -> {
+            Button buttonPositive = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            Button buttonNegative = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+            buttonPositive.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
+            buttonNegative.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
+        });
+
+        return dialog;
     }
 
     @Override

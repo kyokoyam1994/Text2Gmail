@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.telephony.PhoneNumberUtils;
@@ -32,12 +33,16 @@ public class ContactsManualDialogFragment extends AppCompatDialogFragment {
             .setView(view)
             .setNegativeButton("Cancel", null)
             .setPositiveButton("OK", null);
+
         AlertDialog dialog = builder.create();
 
         //Override positive button to prevent closing
         dialog.setOnShowListener(dialogInterface -> {
-            Button b = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view1 -> {
+            Button buttonPositive = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            Button buttonNegative = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+            buttonPositive.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
+            buttonNegative.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
+            buttonPositive.setOnClickListener(view1 -> {
                 TextView textViewErrorMessage = view.findViewById(R.id.textViewErrorMessage);
                 if (PhoneNumberUtils.isGlobalPhoneNumber(editTextEmailAddress.getText().toString())) {
                     textViewErrorMessage.setText("");

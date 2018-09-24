@@ -6,9 +6,10 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        
-        <!--<item name="colorButtonNormal">@color/colorPrimary</item>
-        <item name="colorControlHighlight">@color/colorPrimaryDark</item>-->
+
+        <item name="android:buttonStyle">@style/ButtonStyle</item>
+        <item name="colorButtonNormal">@color/colorPrimaryLight</item>
+        <item name="colorControlHighlight">@color/colorPrimaryDark</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -19,5 +20,15 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="ButtonStyle" parent="@style/Widget.AppCompat.Button">
+        <item name="android:textColor">@color/colorWhite</item>
+    </style>
+
+    <!--<style name="ButtonAddedStyle" parent="@style/Widget.AppCompat.Button">
+        <item name="android:colorButtonNormal">@color/colorYellow</item>>
+        <item name="android:drawableRight">@android:drawable/checkbox_on_background</item>
+        <item name="android:drawablePadding">4dp</item>>
+    </style>-->
 
 </resources>

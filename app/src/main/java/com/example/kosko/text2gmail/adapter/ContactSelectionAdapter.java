@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,20 +15,23 @@ import android.widget.TextView;
 
 import com.example.kosko.text2gmail.R;
 
+import java.util.ArrayList;
+
 public class ContactSelectionAdapter extends CursorAdapter implements View.OnClickListener {
 
-    private ContactAddedListener contactAddedListener;
+    private ContactListener contactListener;
 
-    public interface ContactAddedListener {
+    public interface ContactListener {
+        ArrayList<String> getContacts();
         void onContactAdded(String contactNumber);
     }
 
     public ContactSelectionAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
         try {
-            contactAddedListener = (ContactAddedListener) context;
+            contactListener = (ContactListener) context;
         } catch (ClassCastException ex) {
-            throw new ClassCastException(context.toString() + " must implement" + ContactAddedListener.class.toString());
+            throw new ClassCastException(context.toString() + " must implement" + ContactListener.class.toString());
         }
     }
 
@@ -43,6 +47,14 @@ public class ContactSelectionAdapter extends CursorAdapter implements View.OnCli
         ImageView imageViewContactPhoto = view.findViewById(R.id.imageViewContactPhoto);
         Button buttonAddContact = view.findViewById(R.id.buttonAddContact);
         buttonAddContact.setOnClickListener(this);
+
+        if (contactListener.getContacts().contains(cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)))) {
+            buttonAddContact.setText(R.string.button_add_contact_state_added_text);
+            buttonAddContact.setEnabled(false);
+        } else {
+            buttonAddContact.setText(R.string.button_add_contact_state_unadded_text);
+            buttonAddContact.setEnabled(true);
+        }
 
         textViewContactName.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY)));
         textViewPhoneNumber.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)));
@@ -66,7 +78,8 @@ public class ContactSelectionAdapter extends CursorAdapter implements View.OnCli
             case R.id.buttonAddContact:
                 View parentRow = (View) view.getParent();
                 TextView textViewPhoneNumber = parentRow.findViewById(R.id.textViewPhoneNumber);
-                contactAddedListener.onContactAdded(textViewPhoneNumber.getText().toString());
+                contactListener.onContactAdded(textViewPhoneNumber.getText().toString());
+                notifyDataSetChanged();
                 break;
         }
     }

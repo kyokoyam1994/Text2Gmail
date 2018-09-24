@@ -21,7 +21,7 @@ import com.example.kosko.text2gmail.adapter.ContactSelectionAdapter;
 
 import java.util.ArrayList;
 
-public class ContactSelectionActivity extends AppCompatActivity implements ContactSelectionAdapter.ContactAddedListener, View.OnClickListener {
+public class ContactSelectionActivity extends AppCompatActivity implements ContactSelectionAdapter.ContactListener, View.OnClickListener {
 
     public final static String SELECTED_CONTACTS_LIST = "SELECTED_CONTACTS_LIST";
     private final static String SEARCH_TEXT = "SEARCH_TEXT";
@@ -97,8 +97,14 @@ public class ContactSelectionActivity extends AppCompatActivity implements Conta
     }
 
     @Override
+    public ArrayList<String> getContacts() {
+        return blockedContactsList;
+    }
+
+    @Override
     public void onContactAdded(String contactNumber) {
         if(!blockedContactsList.contains(contactNumber)) {
+            blockedContactsList.add(contactNumber);
             addChip(contactNumber);
         }
     }
@@ -126,7 +132,6 @@ public class ContactSelectionActivity extends AppCompatActivity implements Conta
     }
 
     private void addChip(String contactNumber){
-        blockedContactsList.add(contactNumber);
         Chip chip = new Chip(this);
         chip.setChipText(contactNumber);
         chip.setCloseIconEnabled(true);
@@ -138,6 +143,7 @@ public class ContactSelectionActivity extends AppCompatActivity implements Conta
     private void removeChip(View view, String contactNumber){
         blockedContactsList.remove(contactNumber);
         ((ViewGroup) view.getParent()).removeView(view);
+        contactSelectionAdapter.notifyDataSetChanged();
     }
 
     private Cursor queryContacts(String input){

@@ -31,8 +31,15 @@
     <string name="fri_abbr">F</string>
     <string name="sat_abbr">S</string>
     <string name="sun_abbr">S</string>
+
     <string name="time_picker_dialog_fragment_invalid_time">Please enter a valid start and end time.</string>
     <string name="time_picker_dialog_fragment_end_not_after_start">The end time must be after the start time!</string>
+
+    <string name="schedule_list_item_text_view_day_of_week_text">Day Of Week</string>
+    <string name="schedule_list_item_text_view_header_start_time_text">Start</string>
+    <string name="schedule_list_item_text_view_scheduled_start_time_text">Start Time</string>
+    <string name="schedule_list_item_text_view_header_end_time_text">End</string>
+    <string name="schedule_list_item_text_view_scheduled_end_time_text">End Time</string>
 
     //Message Log Strings
     <string name="empty_message_text">No messages have been sent</string>
@@ -53,6 +60,10 @@
 
     <string name="blocked_contacts_manual_dialog_text">Please enter a phone number to block:</string>
     <string name="blocked_contacts_manual_dialog_error_text">Please enter a valid phone number.</string>
+
+    //Contact Selection
+    <string name="button_add_contact_state_unadded_text">Add</string>
+    <string name="button_add_contact_state_added_text">Added</string>
 
     //Misc Strings
     <string name="search">Search</string>
