@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.kosko.text2gmail.R;
@@ -15,6 +14,8 @@ import com.example.kosko.text2gmail.database.entity.BlockedContact;
 
 import java.util.HashMap;
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class BlockedContactAdapter extends RecyclerView.Adapter<BlockedContactAdapter.ViewHolder> {
 
@@ -72,7 +73,7 @@ public class BlockedContactAdapter extends RecyclerView.Adapter<BlockedContactAd
         private TextView textViewPhoneNumber;
         private TextView textViewContactName;
         private ImageButton buttonDeleteBlockedContact;
-        private ImageView imageViewContactPhoto;
+        private CircleImageView imageViewContactPhoto;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -94,7 +95,7 @@ public class BlockedContactAdapter extends RecyclerView.Adapter<BlockedContactAd
             return buttonDeleteBlockedContact;
         }
 
-        public ImageView getImageViewContactPhoto() {
+        public CircleImageView getImageViewContactPhoto() {
             return imageViewContactPhoto;
         }
 

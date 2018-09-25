@@ -9,12 +9,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CursorAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.kosko.text2gmail.R;
 
 import java.util.ArrayList;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ContactSelectionAdapter extends CursorAdapter implements View.OnClickListener {
 
@@ -43,7 +44,7 @@ public class ContactSelectionAdapter extends CursorAdapter implements View.OnCli
     public void bindView(View view, Context context, Cursor cursor) {
         TextView textViewContactName = view.findViewById(R.id.textViewContactName);
         TextView textViewPhoneNumber = view.findViewById(R.id.textViewPhoneNumber);
-        ImageView imageViewContactPhoto = view.findViewById(R.id.imageViewContactPhoto);
+        CircleImageView imageViewContactPhoto = view.findViewById(R.id.imageViewContactPhoto);
         Button buttonAddContact = view.findViewById(R.id.buttonAddContact);
         buttonAddContact.setOnClickListener(this);
 
