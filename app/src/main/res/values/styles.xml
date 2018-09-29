@@ -25,10 +25,9 @@
         <item name="android:textColor">@color/colorWhite</item>
     </style>
 
-    <!--<style name="ButtonAddedStyle" parent="@style/Widget.AppCompat.Button">
-        <item name="android:colorButtonNormal">@color/colorYellow</item>>
-        <item name="android:drawableRight">@android:drawable/checkbox_on_background</item>
-        <item name="android:drawablePadding">4dp</item>>
-    </style>-->
+    <style name="ChipStyle">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/colorWhite</item>
+    </style>
 
 </resources>

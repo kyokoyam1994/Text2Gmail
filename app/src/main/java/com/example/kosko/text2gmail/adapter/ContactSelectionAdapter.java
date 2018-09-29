@@ -2,8 +2,10 @@ package com.example.kosko.text2gmail.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,9 +53,11 @@ public class ContactSelectionAdapter extends CursorAdapter implements View.OnCli
         if (contactListener.getContacts().contains(cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)))) {
             buttonAddContact.setText(R.string.button_add_contact_state_added_text);
             buttonAddContact.setEnabled(false);
+            buttonAddContact.getBackground().setColorFilter(ContextCompat.getColor(context, R.color.colorNavy), PorterDuff.Mode.SRC);
         } else {
             buttonAddContact.setText(R.string.button_add_contact_state_unadded_text);
             buttonAddContact.setEnabled(true);
+            buttonAddContact.getBackground().setColorFilter(ContextCompat.getColor(context, R.color.colorPrimaryLight), PorterDuff.Mode.SRC);
         }
 
         textViewContactName.setText(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY)));

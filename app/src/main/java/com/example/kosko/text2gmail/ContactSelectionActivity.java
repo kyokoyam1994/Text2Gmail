@@ -9,6 +9,7 @@ import android.provider.ContactsContract;
 import android.support.design.chip.Chip;
 import android.support.design.chip.ChipGroup;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
@@ -132,6 +133,10 @@ public class ContactSelectionActivity extends AppCompatActivity implements Conta
 
     private void addChip(String contactNumber) {
         Chip chip = new Chip(this);
+        chip.setTextAppearanceResource(R.style.ChipStyle);
+        chip.setChipBackgroundColorResource(R.color.colorNavy);
+        chip.setCloseIconTintResource(R.color.colorWhite);
+        Log.d("TAG", String.valueOf(chip.getTextAppearance().textSize));
         chip.setChipText(contactNumber);
         chip.setCloseIconEnabled(true);
         chip.setOnCloseIconClickListener((view) -> removeChip(view, contactNumber));

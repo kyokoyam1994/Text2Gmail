@@ -2,6 +2,7 @@ package com.example.kosko.text2gmail.fragment;
 
 import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -121,18 +122,18 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
     }
 
     private void insertBlockedContacts(ArrayList<BlockedContact> blockedContacts) {
-        new BlockedContactTask(BlockedContactOperation.INSERT, blockedContacts).execute();
+        new BlockedContactTask(this, BlockedContactOperation.INSERT, blockedContacts).execute();
     }
 
     private void deleteBlockedContact(BlockedContact blockedContact) {
-        new BlockedContactTask(BlockedContactOperation.DELETE, new ArrayList<>(Arrays.asList(new BlockedContact[]{blockedContact}))).execute();
+        new BlockedContactTask(this, BlockedContactOperation.DELETE, new ArrayList<>(Arrays.asList(new BlockedContact[]{blockedContact}))).execute();
     }
 
-    private void refreshBlockedContacts() { new BlockedContactTask(BlockedContactOperation.REFRESH, null).execute(); }
+    private void refreshBlockedContacts() { new BlockedContactTask(this, BlockedContactOperation.REFRESH, null).execute(); }
 
-    private void toggleBlockedContactsView () {
-        RecyclerView recyclerViewBlockedContacts = getView().findViewById(R.id.recyclerViewBlockedContacts);
-        TextView textViewEmptyBlockedContacts = getView().findViewById(R.id.textViewEmptyBlockedContacts);
+    private void toggleBlockedContactsView (View view) {
+        RecyclerView recyclerViewBlockedContacts = view.findViewById(R.id.recyclerViewBlockedContacts);
+        TextView textViewEmptyBlockedContacts = view.findViewById(R.id.textViewEmptyBlockedContacts);
         if (recyclerViewBlockedContacts.getAdapter().getItemCount() > 0) {
             textViewEmptyBlockedContacts.setVisibility(View.INVISIBLE);
             recyclerViewBlockedContacts.setVisibility(View.VISIBLE);
@@ -142,27 +143,30 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
         }
     }
 
-    private class BlockedContactTask extends AsyncTask<Void, Void, List<BlockedContact>> {
+    private static class BlockedContactTask extends AsyncTask<Void, Void, List<BlockedContact>> {
+        private SettingsFragment fragment;
+        private Context context;
         private BlockedContactOperation operation;
         private ArrayList<BlockedContact> blockedContacts;
         private HashMap<String, String> contactNameMap = new HashMap<>();
         private HashMap<String, String> contactImageMap = new HashMap<>();
 
-        BlockedContactTask(BlockedContactOperation operation, ArrayList<BlockedContact> blockedContacts) {
+        BlockedContactTask(SettingsFragment fragment, BlockedContactOperation operation, ArrayList<BlockedContact> blockedContacts) {
+            this.fragment = fragment;
             this.operation = operation;
             this.blockedContacts = blockedContacts;
+            context = fragment.getContext().getApplicationContext();
         }
 
         @Override
         protected List<BlockedContact> doInBackground(Void... voids) {
+            if (operation == BlockedContactOperation.INSERT) AppDatabase.getInstance(context).blockedContactDao().insertAll(blockedContacts);
+            else if (operation == BlockedContactOperation.DELETE) AppDatabase.getInstance(context).blockedContactDao().deleteAll(blockedContacts);
 
-            if (operation == BlockedContactOperation.INSERT) AppDatabase.getInstance(getActivity()).blockedContactDao().insertAll(blockedContacts);
-            else if (operation == BlockedContactOperation.DELETE) AppDatabase.getInstance(getActivity()).blockedContactDao().deleteAll(blockedContacts);
-
-            List<BlockedContact> blockedContacts = AppDatabase.getInstance(getActivity()).blockedContactDao().getAll();
+            List<BlockedContact> blockedContacts = AppDatabase.getInstance(context).blockedContactDao().getAll();
             for (BlockedContact contact : blockedContacts) {
-                contactNameMap.put(contact.getBlockedNumber(), Util.findContactNameByNumber(getActivity(), contact.getBlockedNumber()));
-                ContentResolver contentResolver = getActivity().getContentResolver();
+                contactNameMap.put(contact.getBlockedNumber(), Util.findContactNameByNumber(context, contact.getBlockedNumber()));
+                ContentResolver contentResolver = context.getContentResolver();
                 Cursor cursor = contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, new String[]{ContactsContract.Contacts._ID, ContactsContract.Contacts.PHOTO_THUMBNAIL_URI},
                         ContactsContract.CommonDataKinds.Phone.NUMBER + " = ?", new String[]{contact.getBlockedNumber()}, null);
 
@@ -183,11 +187,16 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
 
         @Override
         protected void onPostExecute(List<BlockedContact> blockedContacts) {
-            BlockedContactAdapter adapter = new BlockedContactAdapter(SettingsFragment.this, blockedContacts, contactNameMap, contactImageMap);
-            RecyclerView recyclerViewBlockedContacts = getView().findViewById(R.id.recyclerViewBlockedContacts);
-            recyclerViewBlockedContacts.setAdapter(adapter);
-            recyclerViewBlockedContacts.setLayoutManager(new LinearLayoutManager(getActivity()));
-            toggleBlockedContactsView();
+            if (fragment != null && fragment.getActivity() != null && !fragment.getActivity().isFinishing() && !fragment.getActivity().isDestroyed()) {
+                View view = fragment.getView();
+                if (view != null) {
+                    BlockedContactAdapter adapter = new BlockedContactAdapter(fragment, blockedContacts, contactNameMap, contactImageMap);
+                    RecyclerView recyclerViewBlockedContacts = view.findViewById(R.id.recyclerViewBlockedContacts);
+                    recyclerViewBlockedContacts.setAdapter(adapter);
+                    recyclerViewBlockedContacts.setLayoutManager(new LinearLayoutManager(fragment.getActivity()));
+                    fragment.toggleBlockedContactsView(view);
+                }
+            }
         }
     }
 

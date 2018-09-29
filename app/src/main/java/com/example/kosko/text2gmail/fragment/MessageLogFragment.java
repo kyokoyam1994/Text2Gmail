@@ -29,7 +29,6 @@ public class MessageLogFragment extends ListFragment implements View.OnClickList
     public static final String REFRESH_INTENT = "REFRESH_INTENT";
 
     private LogUpdateBroadcastReceiver logUpdateBroadcastReceiver;
-    private Spinner spinnerSortLog;
 
     private enum LogEntryOperation {
         REFRESH,
@@ -40,10 +39,10 @@ public class MessageLogFragment extends ListFragment implements View.OnClickList
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.message_log_fragment, container, false);
         Button buttonClearLog = view.findViewById(R.id.buttonClearLog);
-        spinnerSortLog = view.findViewById(R.id.spinnerSortLog);
+        Spinner spinnerSortLog = view.findViewById(R.id.spinnerSortLog);
         spinnerSortLog.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) { refreshLog(); }
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) { performLogOperation(LogEntryOperation.REFRESH); }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {}
         });
@@ -55,7 +54,7 @@ public class MessageLogFragment extends ListFragment implements View.OnClickList
     @Override
     public void onResume() {
         super.onResume();
-        refreshLog();
+        performLogOperation(LogEntryOperation.REFRESH);
         logUpdateBroadcastReceiver = new LogUpdateBroadcastReceiver();
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(logUpdateBroadcastReceiver, new IntentFilter(REFRESH_INTENT));
     }
@@ -70,56 +69,65 @@ public class MessageLogFragment extends ListFragment implements View.OnClickList
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.buttonClearLog:
-                clearLog();
+                performLogOperation(LogEntryOperation.CLEAR);
                 break;
         }
     }
 
-    private void clearLog(){
-        new LogEntryTask(LogEntryOperation.CLEAR).execute();
+    private void performLogOperation(LogEntryOperation operation){
+        View view = getView();
+        if(view != null) {
+            Spinner spinnerSortLog = view.findViewById(R.id.spinnerSortLog);
+            new LogEntryTask(this, operation, spinnerSortLog.getSelectedItem().toString()).execute();
+        }
     }
 
-    private void refreshLog(){
-        new LogEntryTask(LogEntryOperation.REFRESH).execute();
-    }
-
-    private class LogEntryTask extends AsyncTask<Void, Void, List<LogEntry>> {
+    private static class LogEntryTask extends AsyncTask<Void, Void, List<LogEntry>> {
+        private MessageLogFragment fragment;
+        private Context context;
         private LogEntryOperation operation;
-        private String sortOption = spinnerSortLog.getSelectedItem().toString();
+        private String sortOption;
+        private String sender;
         private HashMap<String, String> contactNameMap = new HashMap<>();
 
-        LogEntryTask(LogEntryOperation operation) {
+        LogEntryTask(MessageLogFragment fragment, LogEntryOperation operation, String sortOption) {
+            this.fragment = fragment;
             this.operation = operation;
+            this.sortOption = sortOption;
+            sender = fragment.getResources().getString(R.string.sender);
+            context = fragment.getContext().getApplicationContext();
         }
 
         @Override
         protected List<LogEntry> doInBackground(Void... voids) {
-            if(operation == LogEntryOperation.CLEAR) {
-                AppDatabase.getInstance(getActivity()).logEntryDao().deleteAll();
+            if (operation == LogEntryOperation.CLEAR) {
+                AppDatabase.getInstance(context).logEntryDao().deleteAll();
             }
 
             List<LogEntry> entries;
-            if (sortOption.equals(getResources().getString(R.string.sender))) {
-                entries = Util.sortLogEntriesByContactName(getActivity(), AppDatabase.getInstance(getActivity()).logEntryDao().getAllBySender());
+            if (sortOption.equals(sender)) {
+                entries = Util.sortLogEntriesByContactName(context, AppDatabase.getInstance(context).logEntryDao().getAllBySender());
             } else {
-                entries = AppDatabase.getInstance(getActivity()).logEntryDao().getAllByTimestamp();
+                entries = AppDatabase.getInstance(context).logEntryDao().getAllByTimestamp();
             }
 
-            for (LogEntry entry : entries) contactNameMap.put(entry.getSenderNumber(), Util.findContactNameByNumber(getActivity(), entry.getSenderNumber()));
+            for (LogEntry entry : entries) contactNameMap.put(entry.getSenderNumber(), Util.findContactNameByNumber(context, entry.getSenderNumber()));
             return entries;
         }
 
         @Override
         protected void onPostExecute(List<LogEntry> logEntries) {
-            LogEntryAdapter adapter = new LogEntryAdapter(getActivity(), R.layout.log_entry, logEntries, contactNameMap);
-            setListAdapter(adapter);
+            if (fragment != null && fragment.getActivity() != null && !fragment.getActivity().isFinishing() && !fragment.getActivity().isDestroyed()) {
+                LogEntryAdapter adapter = new LogEntryAdapter(fragment.getActivity(), R.layout.log_entry, logEntries, contactNameMap);
+                fragment.setListAdapter(adapter);
+            }
         }
     }
 
     private class LogUpdateBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            refreshLog();
+            performLogOperation(LogEntryOperation.REFRESH);
         }
     }
 

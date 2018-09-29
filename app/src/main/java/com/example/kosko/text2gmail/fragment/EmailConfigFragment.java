@@ -140,7 +140,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
 
         if (resultCode == RESULT_OK) {
             if (requestCode == ACCOUNT_CODE) {
-                new AuthTokenTask(data).execute();
+                new AuthTokenTask(this, data).execute();
             }
         }
     }
@@ -261,10 +261,19 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         } else labelScheduleTime.setText(getResources().getString(R.string.label_schedule_time_off_text));
     }
 
-    private class AuthTokenTask extends AsyncTask<Void, Void, Boolean> {
+    private GoogleSignInClient getGoogleSignInClient() {
+        return gsClient;
+    }
+
+    private static class AuthTokenTask extends AsyncTask<Void, Void, Boolean> {
+        private EmailConfigFragment fragment;
+        private Context context;
         private Intent data;
-        public AuthTokenTask(Intent data) {
+
+        public AuthTokenTask(EmailConfigFragment fragment, Intent data) {
+            this.fragment = fragment;
             this.data = data;
+            context = fragment.getContext().getApplicationContext();
         }
 
         @Override
@@ -311,15 +320,15 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
 
                     if(jsonObject.has("refresh_token")) refreshToken = jsonObject.getString("refresh_token");
                     else {
-                        List<RefreshToken> token = AppDatabase.getInstance(getActivity()).refreshTokenDao().getRefreshTokenByEmail(account.getEmail());
+                        List<RefreshToken> token = AppDatabase.getInstance(context).refreshTokenDao().getRefreshTokenByEmail(account.getEmail());
                         if(!token.isEmpty()) refreshToken = token.get(0).getRefreshToken();
                     }
 
                     if(account.getEmail() != null && accessToken != null && refreshToken != null) {
-                        DefaultSharedPreferenceManager.setUserEmail(getActivity(), account.getEmail());
-                        DefaultSharedPreferenceManager.setUserAccessToken(getActivity(), accessToken);
-                        DefaultSharedPreferenceManager.setUserRefreshToken(getActivity(), refreshToken);
-                        AppDatabase.getInstance(getActivity()).refreshTokenDao().insert(new RefreshToken(account.getEmail(), refreshToken));
+                        DefaultSharedPreferenceManager.setUserEmail(context, account.getEmail());
+                        DefaultSharedPreferenceManager.setUserAccessToken(context, accessToken);
+                        DefaultSharedPreferenceManager.setUserRefreshToken(context, refreshToken);
+                        AppDatabase.getInstance(context).refreshTokenDao().insert(new RefreshToken(account.getEmail(), refreshToken));
                         Log.d(TAG, "SUCCESS!!");
                         success = true;
                     }
@@ -334,13 +343,16 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
 
         @Override
         protected void onPostExecute(Boolean success) {
-            gsClient.signOut();
-            if (success) {
-                updateConfiguredEmail(getView());
-                updateStatusCircle(getView(), Util.isSMSMissedCallBroadcastReceiverOn(getActivity()));
-            } else {
-                Toast.makeText(getActivity(), "Could not sign in", Toast.LENGTH_SHORT).show();
-                //deleteConfiguredEmail(getView());
+            if (fragment != null && fragment.getActivity() != null && !fragment.getActivity().isFinishing() && !fragment.getActivity().isDestroyed()) {
+                fragment.getGoogleSignInClient().signOut();
+                View view = fragment.getView();
+                if (success && view != null) {
+                    fragment.updateConfiguredEmail(view);
+                    fragment.updateStatusCircle(view, Util.isSMSMissedCallBroadcastReceiverOn(fragment.getActivity()));
+                } else if (!success) {
+                    Toast.makeText(fragment.getActivity(), "Could not sign in", Toast.LENGTH_SHORT).show();
+                    //deleteConfiguredEmail(getView());
+                }
             }
         }
     }
