@@ -62,7 +62,7 @@ public class DefaultSharedPreferenceManager {
     }
 
     public static boolean getForwardMissedCalls (Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(FORWARD_MISSED_CALLS_KEY, true);
+        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(FORWARD_MISSED_CALLS_KEY, false);
     }
 
     public static void setForwardMissedCalls (Context context, boolean newValue) {

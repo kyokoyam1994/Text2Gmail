@@ -1,5 +1,6 @@
 package com.example.kosko.text2gmail.fragment;
 
+import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.BroadcastReceiver;
@@ -11,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -65,7 +67,9 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
 
     private static final String TAG = EmailConfigFragment.class.getName();
     public static final String SCHEDULE_STATUS_INTENT = "SCHEDULE_STATUS_INTENT";
+
     private static final int ACCOUNT_CODE = 101;
+    private static final int RC_SERVICE_STATUS_PERMISSION_GRANTED = 202;
 
     private ScheduleStatusBroadcastReceiver scheduleStatusBroadcastReceiver;
     private GoogleSignInOptions gso;
@@ -103,7 +107,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
     public void onResume() {
         //Perform check here to see whether Google account still exists on device, remove it from configured email if not
         super.onResume();
-        if (Util.isAccountConfigured(getActivity())) {
+        if (Util.isAccountConfigured(getActivity()) && Util.checkPermission(getActivity(), Constants.PERMISSIONS_CONTACTS)) {
             String user = DefaultSharedPreferenceManager.getUserEmail(getActivity());
             Account userAccount = null;
             AccountManager accountManager = AccountManager.get(getActivity());
@@ -142,6 +146,31 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
             if (requestCode == ACCOUNT_CODE) {
                 new AuthTokenTask(this, data).execute();
             }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case RC_SERVICE_STATUS_PERMISSION_GRANTED:
+                Switch switchServiceStatus = getView().findViewById(R.id.switchServiceStatus);
+                boolean permissionGranted = false;
+
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) permissionGranted = true;
+                else Toast.makeText(getActivity(), "Needs permission for SMS", Toast.LENGTH_SHORT).show();
+
+                PackageManager packageManager = getActivity().getPackageManager();
+                ComponentName componentName = new ComponentName(getActivity(), SMSMissedCallBroadcastReceiver.class);
+                int state = PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+                if (permissionGranted) state = PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+                packageManager.setComponentEnabledSetting(componentName, state, PackageManager.DONT_KILL_APP);
+                updateStatusCircle(getView(), permissionGranted);
+
+                //Disable temporarily to prevent callback
+                switchServiceStatus.setOnCheckedChangeListener(null);
+                switchServiceStatus.setChecked(permissionGranted);
+                switchServiceStatus.setOnCheckedChangeListener(this);
         }
     }
 
@@ -210,12 +239,16 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
     }
 
     private void toggleServiceStatus(boolean isChecked) {
-        PackageManager packageManager = getActivity().getPackageManager();
-        ComponentName componentName = new ComponentName(getActivity(), SMSMissedCallBroadcastReceiver.class);
-        int state = PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-        if (isChecked) state = PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-        packageManager.setComponentEnabledSetting(componentName, state, PackageManager.DONT_KILL_APP);
-        updateStatusCircle(getView(), isChecked);
+        if (Util.checkPermission(getActivity(), Constants.PERMISSIONS_SMS)) {
+            PackageManager packageManager = getActivity().getPackageManager();
+            ComponentName componentName = new ComponentName(getActivity(), SMSMissedCallBroadcastReceiver.class);
+            int state = PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+            if (isChecked) state = PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+            packageManager.setComponentEnabledSetting(componentName, state, PackageManager.DONT_KILL_APP);
+            updateStatusCircle(getView(), isChecked);
+        } else {
+            requestPermissions(new String[] {Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS}, RC_SERVICE_STATUS_PERMISSION_GRANTED);
+        }
     }
 
     private void toggleSchedulingMode(boolean isChecked) {

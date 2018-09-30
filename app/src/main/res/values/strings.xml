@@ -5,6 +5,11 @@
     <string name="tab_text_3">Settings</string>
     <string name="action_settings">Settings</string>
 
+    <string name="contacts_permission_dialog_message">
+        Text2Gmail uses contact permissions to display known contacts that are sending incoming text messages and phone calls.
+        It is highly recommended to give this permission to the app for a better user experience.
+    </string>>
+
     //Email Config Strings
     <string name="status_label_text_running">Running</string>
     <string name="status_label_text_stopped">Stopped</string>

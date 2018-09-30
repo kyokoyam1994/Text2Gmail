@@ -1,13 +1,16 @@
 package com.example.kosko.text2gmail.fragment;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,12 +21,14 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.kosko.text2gmail.ContactSelectionActivity;
 import com.example.kosko.text2gmail.R;
 import com.example.kosko.text2gmail.adapter.BlockedContactAdapter;
 import com.example.kosko.text2gmail.database.AppDatabase;
 import com.example.kosko.text2gmail.database.entity.BlockedContact;
+import com.example.kosko.text2gmail.util.Constants;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 import com.example.kosko.text2gmail.util.Util;
 
@@ -37,6 +42,8 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
 
     private static final int RC_CONTACT_MANUAL = 101;
     private static final int RC_CONTACT_FROM_BOOK = 201;
+    private static final int RC_CONTACT_FROM_BOOK_PERMISSION_GRANTED = 202;
+    private static final int RC_MISSED_CALL_PERMISSION_GRANTED = 303;
 
     private enum BlockedContactOperation {
         REFRESH,
@@ -81,6 +88,30 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case RC_CONTACT_FROM_BOOK_PERMISSION_GRANTED:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Intent intent = new Intent(getActivity(), ContactSelectionActivity.class);
+                    startActivityForResult(intent, RC_CONTACT_FROM_BOOK);
+                } else Toast.makeText(getActivity(), "Needs permission for contacts", Toast.LENGTH_SHORT).show();
+            case RC_MISSED_CALL_PERMISSION_GRANTED:
+                CheckBox checkBoxMissedCalls = getView().findViewById(R.id.checkBoxMissedCalls);
+                boolean permissionGranted = false;
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) permissionGranted = true;
+                else Toast.makeText(getActivity(), "Needs permission for phone calls", Toast.LENGTH_SHORT).show();
+
+                //Disable temporarily to prevent callback
+                checkBoxMissedCalls.setOnCheckedChangeListener(null);
+                checkBoxMissedCalls.setChecked(permissionGranted);
+                checkBoxMissedCalls.setOnCheckedChangeListener(this);
+
+                DefaultSharedPreferenceManager.setForwardMissedCalls(getActivity(), permissionGranted);
+        }
+    }
+
+    @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.buttonBlockContactsManual:
@@ -113,12 +144,20 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
     }
 
     private void blockContactsFromBook() {
-        Intent intent = new Intent(getActivity(), ContactSelectionActivity.class);
-        startActivityForResult(intent, RC_CONTACT_FROM_BOOK);
+        if (Util.checkPermission(getActivity(), Constants.PERMISSIONS_CONTACTS)) {
+            Intent intent = new Intent(getActivity(), ContactSelectionActivity.class);
+            startActivityForResult(intent, RC_CONTACT_FROM_BOOK);
+        } else {
+            requestPermissions(new String[] {Manifest.permission.READ_CONTACTS, Manifest.permission.GET_ACCOUNTS}, RC_CONTACT_FROM_BOOK_PERMISSION_GRANTED);
+        }
     }
 
     private void toggleForwardMissedCalls(boolean isChecked) {
-        DefaultSharedPreferenceManager.setForwardMissedCalls(getActivity(), isChecked);
+        if (Util.checkPermission(getActivity(), Constants.PERMISSIONS_PHONE)) {
+            DefaultSharedPreferenceManager.setForwardMissedCalls(getActivity(), isChecked);
+        } else {
+            requestPermissions(new String[] {Manifest.permission.READ_PHONE_STATE, Manifest.permission.PROCESS_OUTGOING_CALLS}, RC_MISSED_CALL_PERMISSION_GRANTED);
+        }
     }
 
     private void insertBlockedContacts(ArrayList<BlockedContact> blockedContacts) {
@@ -166,9 +205,13 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
             List<BlockedContact> blockedContacts = AppDatabase.getInstance(context).blockedContactDao().getAll();
             for (BlockedContact contact : blockedContacts) {
                 contactNameMap.put(contact.getBlockedNumber(), Util.findContactNameByNumber(context, contact.getBlockedNumber()));
-                ContentResolver contentResolver = context.getContentResolver();
-                Cursor cursor = contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, new String[]{ContactsContract.Contacts._ID, ContactsContract.Contacts.PHOTO_THUMBNAIL_URI},
-                        ContactsContract.CommonDataKinds.Phone.NUMBER + " = ?", new String[]{contact.getBlockedNumber()}, null);
+
+                Cursor cursor = null;
+                if (Util.checkPermission(context, Constants.PERMISSIONS_CONTACTS)) {
+                    ContentResolver contentResolver = context.getContentResolver();
+                    cursor = contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, new String[]{ContactsContract.Contacts._ID, ContactsContract.Contacts.PHOTO_THUMBNAIL_URI},
+                            ContactsContract.CommonDataKinds.Phone.NUMBER + " = ?", new String[]{contact.getBlockedNumber()}, null);
+                }
 
                 if(cursor != null && cursor.moveToFirst()) {
                     contactImageMap.put(contact.getBlockedNumber(), cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_THUMBNAIL_URI)));
