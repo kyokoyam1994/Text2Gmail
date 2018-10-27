@@ -3,21 +3,13 @@ package com.example.kosko.text2gmail;
 import android.content.Context;
 import android.util.Log;
 
+import com.example.kosko.text2gmail.retrofit.GoogleApiClient;
+import com.example.kosko.text2gmail.retrofit.GoogleResponse;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 import com.sun.mail.smtp.SMTPTransport;
 import com.sun.mail.util.BASE64EncoderStream;
 import com.sun.mail.util.MailConnectException;
 
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Properties;
 import javax.activation.DataHandler;
 import javax.mail.Authenticator;
@@ -29,9 +21,12 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.util.ByteArrayDataSource;
 
+import retrofit2.Response;
+
 public class GMailSender extends Authenticator {
 
     private static final String TAG = GMailSender.class.getName();
+
     private Context context;
     private Session session;
 
@@ -50,7 +45,6 @@ public class GMailSender extends Authenticator {
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.starttls.required", "true");
         props.put("mail.smtp.sasl.enable", "false");
-        //props.put("mail.imaps.sasl.mechanisms.oauth2.oauthToken", oauthToken);
         session = Session.getInstance(props);
         session.setDebug(debug);
 
@@ -72,42 +66,20 @@ public class GMailSender extends Authenticator {
     }
 
     private boolean refreshAccessToken() {
-        HttpURLConnection connection = null;
         try {
-            URL endpoint = new URL("https://www.googleapis.com/oauth2/v4/token");
-            connection = (HttpURLConnection) endpoint.openConnection();
-            connection.setRequestMethod("POST");
+            Response<GoogleResponse> response = GoogleApiClient.getInstance()
+                .getAccessToken(null, BuildConfig.Client_Id, BuildConfig.Secret_Id, "refresh_token", DefaultSharedPreferenceManager.getUserRefreshToken(context)).execute();
 
-            String dataParams = "&client_id=" + BuildConfig.Client_Id +
-                    "&client_secret=" + BuildConfig.Secret_Id +
-                    "&refresh_token=" + DefaultSharedPreferenceManager.getUserRefreshToken(context) +
-                    "&grant_type=refresh_token";
-
-            OutputStream os = connection.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-            writer.append(dataParams);
-            writer.flush();
-            writer.close();
-            os.close();
-
-            connection.connect();
-            int responseCode = connection.getResponseCode();
-            if(responseCode == HttpURLConnection.HTTP_OK){
-                InputStream inputStream = connection.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-                String jsonString = "";
-                String line;
-                while ((line = bufferedReader.readLine()) != null) jsonString += line;
-
-                JSONObject jsonObject = new JSONObject(jsonString);
-                String accessToken = jsonObject.getString("access_token");
-                if(accessToken != null){
+            if (response.isSuccessful()) {
+                GoogleResponse googleResponse = response.body();
+                String accessToken = googleResponse.getAccessToken();
+                if (accessToken != null){
                     DefaultSharedPreferenceManager.setUserAccessToken(context, accessToken);
                     return true;
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Exception", e);
         }
 
         return false;
@@ -123,8 +95,7 @@ public class GMailSender extends Authenticator {
         } catch (MessagingException ex) {
             //Refresh access token and try again
             Log.d(TAG, "Initial SMTP connection failed, refreshing accessing token...");
-            refreshAccessToken();
-            smtpTransport = connectToSmtp("smtp.gmail.com", 587, user, DefaultSharedPreferenceManager.getUserAccessToken(context), true);
+            if (refreshAccessToken()) smtpTransport = connectToSmtp("smtp.gmail.com", 587, user, DefaultSharedPreferenceManager.getUserAccessToken(context), true);
         }
 
         MimeMessage message = new MimeMessage(session);

@@ -6,6 +6,7 @@ import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,8 @@ import java.util.ArrayList;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ContactSelectionAdapter extends CursorAdapter implements View.OnClickListener {
+
+    private static final String TAG = ContactSelectionAdapter.class.getName();
 
     private ContactListener contactListener;
 
@@ -70,7 +73,7 @@ public class ContactSelectionAdapter extends CursorAdapter implements View.OnCli
                 imageViewContactPhoto.setImageURI(Uri.parse(image));
                 invalidURI = false;
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(TAG, "Exception", e);
             }
         }
         if(invalidURI) imageViewContactPhoto.setImageResource(R.drawable.unknown_user_icon);

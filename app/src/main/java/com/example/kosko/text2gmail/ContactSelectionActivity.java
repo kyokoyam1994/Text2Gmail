@@ -24,6 +24,8 @@ import java.util.ArrayList;
 
 public class ContactSelectionActivity extends AppCompatActivity implements ContactSelectionAdapter.ContactListener, View.OnClickListener {
 
+    private static final String TAG = ContactSelectionActivity.class.getName();
+
     public final static String SELECTED_CONTACTS_LIST = "SELECTED_CONTACTS_LIST";
     private final static String SEARCH_TEXT = "SEARCH_TEXT";
     private final static String[] CONTACTS_PROJECTION = {ContactsContract.Contacts._ID,
@@ -136,7 +138,7 @@ public class ContactSelectionActivity extends AppCompatActivity implements Conta
         chip.setTextAppearanceResource(R.style.ChipStyle);
         chip.setChipBackgroundColorResource(R.color.colorNavy);
         chip.setCloseIconTintResource(R.color.colorWhite);
-        Log.d("TAG", String.valueOf(chip.getTextAppearance().textSize));
+        Log.d(TAG, String.valueOf(chip.getTextAppearance().textSize));
         chip.setChipText(contactNumber);
         chip.setCloseIconEnabled(true);
         chip.setOnCloseIconClickListener((view) -> removeChip(view, contactNumber));

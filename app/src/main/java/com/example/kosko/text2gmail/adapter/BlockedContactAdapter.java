@@ -3,6 +3,7 @@ package com.example.kosko.text2gmail.adapter;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,8 @@ import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class BlockedContactAdapter extends RecyclerView.Adapter<BlockedContactAdapter.ViewHolder> {
+
+    private static final String TAG = BlockedContactAdapter.class.getName();
 
     public interface BlockedContactListener {
         void onBlockedContactDeleted(BlockedContact blockedContact);
@@ -58,7 +61,7 @@ public class BlockedContactAdapter extends RecyclerView.Adapter<BlockedContactAd
                 holder.getImageViewContactPhoto().setImageURI(Uri.parse(image));
                 invalidURI = false;
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(TAG, "Exception", e);
             }
         }
         if(invalidURI) holder.getImageViewContactPhoto().setImageResource(R.drawable.unknown_user_icon);

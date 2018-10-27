@@ -37,6 +37,8 @@ import com.example.kosko.text2gmail.database.AppDatabase;
 import com.example.kosko.text2gmail.database.entity.RefreshToken;
 import com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver;
 import com.example.kosko.text2gmail.receiver.SMSMissedCallBroadcastReceiver;
+import com.example.kosko.text2gmail.retrofit.GoogleApiClient;
+import com.example.kosko.text2gmail.retrofit.GoogleResponse;
 import com.example.kosko.text2gmail.util.Constants;
 import com.example.kosko.text2gmail.util.DefaultSharedPreferenceManager;
 import com.example.kosko.text2gmail.util.Util;
@@ -48,24 +50,17 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.Task;
 
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Calendar;
 import java.util.List;
+
+import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 
 public class EmailConfigFragment extends Fragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
     private static final String TAG = EmailConfigFragment.class.getName();
+
     public static final String SCHEDULE_STATUS_INTENT = "SCHEDULE_STATUS_INTENT";
 
     private static final int ACCOUNT_CODE = 101;
@@ -313,48 +308,21 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         protected Boolean doInBackground(Void... voids) {
             boolean success = false;
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            HttpURLConnection connection = null;
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 String serverAuthCode = account.getServerAuthCode();
                 Log.d(TAG, serverAuthCode);
-                URL endpoint = new URL("https://www.googleapis.com/oauth2/v4/token");
-                connection = (HttpURLConnection) endpoint.openConnection();
-                connection.setRequestMethod("POST");
 
-                String dataParams = "code=" + serverAuthCode +
-                        "&client_id=" + BuildConfig.Client_Id +
-                        "&client_secret=" + BuildConfig.Secret_Id +
-                        "&grant_type=authorization_code";
-                Log.d(TAG, dataParams);
+                Response<GoogleResponse> response = GoogleApiClient.getInstance()
+                    .getAccessToken(serverAuthCode, BuildConfig.Client_Id, BuildConfig.Secret_Id, "authorization_code", null).execute();
 
-                OutputStream os = connection.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-                writer.append(dataParams);
-                writer.flush();
-                writer.close();
-                os.close();
-
-                connection.connect();
-                int responseCode = connection.getResponseCode();
-                if(responseCode == HttpURLConnection.HTTP_OK) {
-                    InputStream inputStream = connection.getInputStream();
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-                    String jsonString = "";
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) jsonString += line;
-
-                    JSONObject jsonObject = new JSONObject(jsonString);
-                    String accessToken = null;
-                    String refreshToken = null;
-                    Log.d(TAG, jsonString);
-
-                    if(jsonObject.has("access_token")) accessToken = jsonObject.getString("access_token");
-
-                    if(jsonObject.has("refresh_token")) refreshToken = jsonObject.getString("refresh_token");
-                    else {
+                if (response.isSuccessful()) {
+                    GoogleResponse googleResponse = response.body();
+                    String accessToken = googleResponse.getAccessToken();
+                    String refreshToken = googleResponse.getRefreshToken();
+                    if (refreshToken == null) {
                         List<RefreshToken> token = AppDatabase.getInstance(context).refreshTokenDao().getRefreshTokenByEmail(account.getEmail());
-                        if(!token.isEmpty()) refreshToken = token.get(0).getRefreshToken();
+                        if (!token.isEmpty()) refreshToken = token.get(0).getRefreshToken();
                     }
 
                     if(account.getEmail() != null && accessToken != null && refreshToken != null) {
@@ -367,9 +335,7 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                if (connection != null) connection.disconnect();
+                Log.e(TAG, "Exception", e);
             }
             return success;
         }

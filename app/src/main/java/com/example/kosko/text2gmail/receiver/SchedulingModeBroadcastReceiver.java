@@ -20,6 +20,7 @@ import java.util.Date;
 public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
 
     private static final String TAG = SchedulingModeBroadcastReceiver.class.getName();
+
     private static final int ALARM_CODE = 301;
 
     @Override
@@ -92,7 +93,7 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
             c2.set(Calendar.SECOND, 0);
             c2.set(Calendar.MILLISECOND, 0);
         } catch (ParseException e) {
-            e.printStackTrace();
+            Log.e(TAG, "Exception", e);
         }
 
         boolean isCurrScheduled = false;
