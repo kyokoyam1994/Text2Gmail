@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.example.kosko.text2gmail"
+        applicationId "com.kyokoyama.android.text2gmail"
         minSdkVersion 24
         targetSdkVersion 28
         versionCode 1
