@@ -34,6 +34,7 @@ import com.kyokoyama.android.text2gmail.util.Util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -219,7 +220,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
                 }
             }
 
-            blockedContacts.sort((blockedContact, blockedContact2) -> {
+            Collections.sort(blockedContacts, (blockedContact, blockedContact2) -> {
                 String name = contactNameMap.get(blockedContact.getBlockedNumber()) == null ?  "Unknown" : contactNameMap.get(blockedContact.getBlockedNumber());
                 String name2 = contactNameMap.get(blockedContact2.getBlockedNumber()) == null ? "Unknown" : contactNameMap.get(blockedContact2.getBlockedNumber());
                 if (name.compareTo(name2) == 0) return blockedContact.getBlockedNumber().compareTo(blockedContact2.getBlockedNumber());

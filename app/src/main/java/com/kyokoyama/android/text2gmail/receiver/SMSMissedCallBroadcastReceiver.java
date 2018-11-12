@@ -44,7 +44,13 @@ public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
             Object[] pdus = (Object[]) extras.get("pdus");
             HashMap<String, ArrayList<SmsMessage>> messageMap = new HashMap<>();
             for (Object pdu : pdus) {
-                SmsMessage message = SmsMessage.createFromPdu((byte[]) pdu, extras.getString("format"));
+                SmsMessage message;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                    message = SmsMessage.createFromPdu((byte[]) pdu, extras.getString("format"));
+                }else {
+                    message = SmsMessage.createFromPdu((byte[]) pdu);
+                }
+
                 ArrayList<SmsMessage> messageList = new ArrayList<>();
                 if (messageMap.containsKey(message.getOriginatingAddress())) {
                     messageList = messageMap.get(message.getOriginatingAddress());

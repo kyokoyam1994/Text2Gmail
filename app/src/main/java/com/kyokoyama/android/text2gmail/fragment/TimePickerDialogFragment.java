@@ -2,6 +2,7 @@ package com.kyokoyama.android.text2gmail.fragment;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -54,27 +55,48 @@ public class TimePickerDialogFragment extends AppCompatDialogFragment {
         timePickerSchedule = view.findViewById(R.id.timePickerSchedule);
 
         if(savedInstanceState != null) {
-            timePickerSchedule.setHour(savedInstanceState.getInt(HOUR_KEY));
-            timePickerSchedule.setMinute(savedInstanceState.getInt(MINUTE_KEY));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                timePickerSchedule.setHour(savedInstanceState.getInt(HOUR_KEY));
+                timePickerSchedule.setMinute(savedInstanceState.getInt(MINUTE_KEY));
+            } else {
+                timePickerSchedule.setCurrentHour(savedInstanceState.getInt(HOUR_KEY));
+                timePickerSchedule.setCurrentMinute(savedInstanceState.getInt(MINUTE_KEY));
+            }
         } else {
             try {
                 DateFormat format = new SimpleDateFormat("h:mma");
                 Date parsedTime = format.parse(time);
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(parsedTime);
-                timePickerSchedule.setHour(cal.get(Calendar.HOUR_OF_DAY));
-                timePickerSchedule.setMinute(cal.get(Calendar.MINUTE));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    timePickerSchedule.setHour(cal.get(Calendar.HOUR_OF_DAY));
+                    timePickerSchedule.setMinute(cal.get(Calendar.MINUTE));
+                } else {
+                    timePickerSchedule.setCurrentHour(cal.get(Calendar.HOUR_OF_DAY));
+                    timePickerSchedule.setCurrentMinute(cal.get(Calendar.MINUTE));
+                }
             } catch (ParseException e) {
-                timePickerSchedule.setHour(0);
-                timePickerSchedule.setMinute(0);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    timePickerSchedule.setHour(0);
+                    timePickerSchedule.setMinute(0);
+                } else {
+                    timePickerSchedule.setCurrentHour(0);
+                    timePickerSchedule.setCurrentMinute(0);
+                }
             }
         }
 
         builder.setTitle(title)
             .setMessage(R.string.time_picker_dialog_fragment_message)
             .setView(view)
-            .setNegativeButton("Cancel", (dialog, which) -> timeSelectedListener.onTimeSelected(title, timePickerSchedule.getHour(), timePickerSchedule.getMinute(), true))
-            .setPositiveButton("OK", (dialog, which) -> timeSelectedListener.onTimeSelected(title, timePickerSchedule.getHour(), timePickerSchedule.getMinute(), false));
+            .setNegativeButton("Cancel", (dialog, which) -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) timeSelectedListener.onTimeSelected(title, timePickerSchedule.getHour(), timePickerSchedule.getMinute(), true);
+                else timeSelectedListener.onTimeSelected(title, timePickerSchedule.getCurrentHour(), timePickerSchedule.getCurrentMinute(), true);
+            })
+            .setPositiveButton("OK", (dialog, which) -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) timeSelectedListener.onTimeSelected(title, timePickerSchedule.getHour(), timePickerSchedule.getMinute(), false);
+                else timeSelectedListener.onTimeSelected(title, timePickerSchedule.getCurrentHour(), timePickerSchedule.getCurrentMinute(), false);
+            });
 
         AlertDialog dialog = builder.create();
         dialog.setOnShowListener(dialogInterface -> {
@@ -90,8 +112,19 @@ public class TimePickerDialogFragment extends AppCompatDialogFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(HOUR_KEY, timePickerSchedule.getHour());
-        outState.putInt(MINUTE_KEY, timePickerSchedule.getMinute());
+
+        int hour;
+        int minute;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            hour = timePickerSchedule.getHour();
+            minute = timePickerSchedule.getMinute();
+        } else {
+            hour = timePickerSchedule.getCurrentHour();
+            minute = timePickerSchedule.getCurrentMinute();
+        }
+
+        outState.putInt(HOUR_KEY, hour);
+        outState.putInt(MINUTE_KEY, minute);
     }
 
     public static TimePickerDialogFragment newInstance(int title, String time) {
