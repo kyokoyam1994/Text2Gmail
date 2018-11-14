@@ -150,10 +150,15 @@ public class EmailConfigFragment extends Fragment implements View.OnClickListene
         switch (requestCode) {
             case RC_SERVICE_STATUS_PERMISSION_GRANTED:
                 Switch switchServiceStatus = getView().findViewById(R.id.switchServiceStatus);
-                boolean permissionGranted = false;
 
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) permissionGranted = true;
-                else Toast.makeText(getActivity(), "Needs permission for SMS", Toast.LENGTH_SHORT).show();
+                boolean permissionGranted = true;
+                for (int result : grantResults) {
+                    if (result != PackageManager.PERMISSION_GRANTED) {
+                        permissionGranted = false;
+                        Toast.makeText(getActivity(), "Needs permission for SMS", Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+                }
 
                 PackageManager packageManager = getActivity().getPackageManager();
                 ComponentName componentName = new ComponentName(getActivity(), SMSMissedCallBroadcastReceiver.class);

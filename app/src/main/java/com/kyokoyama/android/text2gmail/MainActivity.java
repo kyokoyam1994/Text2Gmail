@@ -79,7 +79,15 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case RC_CONTACT_STARTUP_PERMISSION_GRANTED:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                boolean permissionGranted = true;
+                for (int result : grantResults) {
+                    if (result != PackageManager.PERMISSION_GRANTED) {
+                        permissionGranted = false;
+                        break;
+                    }
+                }
+
+                if (permissionGranted) {
                     Log.d(TAG,"Permission granted!");
                 } else {
                     Log.d(TAG,"Permission denied!");

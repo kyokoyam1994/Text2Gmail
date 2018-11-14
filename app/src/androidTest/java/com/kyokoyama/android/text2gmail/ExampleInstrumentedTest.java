@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.kosko.text2gmail", appContext.getPackageName());
+        assertEquals("com.kyokoyama.android.text2gmail", appContext.getPackageName());
     }
 }

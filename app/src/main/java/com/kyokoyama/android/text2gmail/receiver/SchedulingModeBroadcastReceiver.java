@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -27,7 +28,7 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "Intent is.. " + intent.getAction());
         if (intent.getAction() != null) {
-            if (intent.getAction().equals("com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver") ||
+            if (intent.getAction().equals("com.kyokoyama.android.text2gmail.receiver.SchedulingModeBroadcastReceiver") ||
                 (intent.getAction().equals("android.intent.action.BOOT_COMPLETED") && DefaultSharedPreferenceManager.getSchedulingMode(context))) {
                     startAlarm(context);
             } else if ( DefaultSharedPreferenceManager.getSchedulingMode(context) &&
@@ -42,17 +43,22 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
 
     public static void startAlarm(Context context) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent("com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver", null, context, SchedulingModeBroadcastReceiver.class);
+        Intent intent = new Intent("com.kyokoyama.android.text2gmail.receiver.SchedulingModeBroadcastReceiver", null, context, SchedulingModeBroadcastReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, ALARM_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         SchedulingModeQueryResult queryResult = querySchedule(context);
-        //alarmManager.set(AlarmManager.RTC_WAKEUP, queryResult.getNextScheduledTime(), pendingIntent);
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, queryResult.getNextScheduledTime(), pendingIntent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            //alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, queryResult.getNextScheduledTime(), pendingIntent);
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, queryResult.getNextScheduledTime(), pendingIntent);
+        } else {
+            //alarmManager.set(AlarmManager.RTC_WAKEUP, queryResult.getNextScheduledTime(), pendingIntent);
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, queryResult.getNextScheduledTime(), pendingIntent);
+        }
         LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(EmailConfigFragment.SCHEDULE_STATUS_INTENT));
     }
 
     public static void cancelAlarm(Context context) {
-        Intent intent = new Intent("com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver", null, context, SchedulingModeBroadcastReceiver.class);
+        Intent intent = new Intent("com.kyokoyama.android.text2gmail.receiver.SchedulingModeBroadcastReceiver", null, context, SchedulingModeBroadcastReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, ALARM_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         pendingIntent.cancel();
@@ -61,7 +67,7 @@ public class SchedulingModeBroadcastReceiver extends BroadcastReceiver {
 
     public static boolean isAlarmActive(Context context) {
         return (PendingIntent.getBroadcast(context, ALARM_CODE,
-            new Intent("com.example.kosko.text2gmail.receiver.SchedulingModeBroadcastReceiver", null, context, SchedulingModeBroadcastReceiver.class),
+            new Intent("com.kyokoyama.android.text2gmail.receiver.SchedulingModeBroadcastReceiver", null, context, SchedulingModeBroadcastReceiver.class),
             PendingIntent.FLAG_NO_CREATE) != null);
     }
 

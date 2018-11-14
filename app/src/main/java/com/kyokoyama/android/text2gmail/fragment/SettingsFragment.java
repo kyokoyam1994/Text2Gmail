@@ -91,17 +91,24 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        boolean permissionGranted = true;
+        for (int result : grantResults) {
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                permissionGranted = false;
+                break;
+            }
+        }
+
         switch (requestCode) {
             case RC_CONTACT_FROM_BOOK_PERMISSION_GRANTED:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (permissionGranted) {
                     Intent intent = new Intent(getActivity(), ContactSelectionActivity.class);
                     startActivityForResult(intent, RC_CONTACT_FROM_BOOK);
                 } else Toast.makeText(getActivity(), "Needs permission for contacts", Toast.LENGTH_SHORT).show();
             case RC_MISSED_CALL_PERMISSION_GRANTED:
                 CheckBox checkBoxMissedCalls = getView().findViewById(R.id.checkBoxMissedCalls);
-                boolean permissionGranted = false;
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) permissionGranted = true;
-                else Toast.makeText(getActivity(), "Needs permission for phone calls", Toast.LENGTH_SHORT).show();
+                if (!permissionGranted) Toast.makeText(getActivity(), "Needs permission for phone calls", Toast.LENGTH_SHORT).show();
 
                 //Disable temporarily to prevent callback
                 checkBoxMissedCalls.setOnCheckedChangeListener(null);
