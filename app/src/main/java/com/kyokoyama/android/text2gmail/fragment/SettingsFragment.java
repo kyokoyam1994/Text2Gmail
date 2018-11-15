@@ -164,7 +164,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener, 
         if (Util.checkPermission(getActivity(), Constants.PERMISSIONS_PHONE)) {
             DefaultSharedPreferenceManager.setForwardMissedCalls(getActivity(), isChecked);
         } else {
-            requestPermissions(new String[] {Manifest.permission.READ_PHONE_STATE, Manifest.permission.PROCESS_OUTGOING_CALLS}, RC_MISSED_CALL_PERMISSION_GRANTED);
+            requestPermissions(new String[] {Manifest.permission.READ_PHONE_STATE, Manifest.permission.PROCESS_OUTGOING_CALLS, Manifest.permission.READ_CALL_LOG}, RC_MISSED_CALL_PERMISSION_GRANTED);
         }
     }
 

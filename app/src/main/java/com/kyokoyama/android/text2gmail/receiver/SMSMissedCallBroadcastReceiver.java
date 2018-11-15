@@ -3,6 +3,7 @@ package com.kyokoyama.android.text2gmail.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
@@ -67,7 +68,7 @@ public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
                 long timestamp = messageList.get(0).getTimestampMillis();
                 startEmailService(context, EmailIntentService.EMAIL_TYPE_SMS, address, message, timestamp);
             }
-        } else if (intent.getAction().equals("android.intent.action.NEW_OUTGOING_CALL") && forwardMissedCalls) {
+        } else if (intent.getAction().equals("android.intent.action.NEW_OUTGOING_CALL") && forwardMissedCalls && Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             savedNumber = intent.getExtras().getString("android.intent.extra.PHONE_NUMBER");
         } else if (intent.getAction().equals("android.intent.action.PHONE_STATE") && forwardMissedCalls) {
             String stateStr = intent.getExtras().getString(TelephonyManager.EXTRA_STATE);
@@ -95,7 +96,11 @@ public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
     }
 
     public void onCallStateChanged(Context context, int state, String number) {
-        if(lastState == state) return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && state ==  TelephonyManager.CALL_STATE_RINGING) {
+            savedNumber = number;
+        }
+
+        if (lastState == state) return;
         switch (state) {
             case TelephonyManager.CALL_STATE_RINGING:
                 isIncoming = true;
@@ -132,7 +137,7 @@ public class SMSMissedCallBroadcastReceiver extends BroadcastReceiver {
         emailIntent.putExtra(EmailIntentService.SMS_SENDER_NUMBER, senderNumber);
         emailIntent.putExtra(EmailIntentService.SMS_CONTENTS, contents);
         emailIntent.putExtra(EmailIntentService.SMS_DATE_RECEIVED, dateReceived);
-        context.startService(emailIntent);
+        EmailIntentService.enqueueWork(context, emailIntent);
     }
 
 }

@@ -1,12 +1,12 @@
 package com.kyokoyama.android.text2gmail;
 
-import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
+import android.support.v4.app.JobIntentService;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.PhoneNumberUtils;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.kyokoyama.android.text2gmail.database.AppDatabase;
 import com.kyokoyama.android.text2gmail.database.entity.BlockedContact;
@@ -18,9 +18,10 @@ import com.kyokoyama.android.text2gmail.util.Util;
 import java.util.Date;
 import java.util.List;
 
-public class EmailIntentService extends IntentService {
+public class EmailIntentService extends JobIntentService {
 
     private static final String TAG = EmailIntentService.class.getName();
+    private static final int JOB_ID = 1000;
 
     public static final String EMAIL_TYPE = "EMAIL_TYPE";
     public static final String EMAIL_TYPE_SMS = "SMS";
@@ -31,15 +32,15 @@ public class EmailIntentService extends IntentService {
     public static final String SMS_DATE_RECEIVED = "SMS_DATE_RECEIVED";
 
     public EmailIntentService() {
-        this("EmailIntentService");
+        super();
     }
 
-    public EmailIntentService(String name) {
-        super(name);
+    public static void enqueueWork(Context context, Intent work) {
+        enqueueWork(context, EmailIntentService.class, JOB_ID, work);
     }
 
     @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
+    protected void onHandleWork(@NonNull Intent intent) {
         if(intent != null) {
             List<BlockedContact> blockedContacts =  AppDatabase.getInstance(this).blockedContactDao().getAll();
 
@@ -79,7 +80,7 @@ public class EmailIntentService extends IntentService {
                 GMailSender sender = new GMailSender(this);
                 sender.sendMail(emailSubject, emailBody, DefaultSharedPreferenceManager.getUserEmail(this), DefaultSharedPreferenceManager.getUserEmail(this));
             } catch (Exception e) {
-                Toast.makeText(this, "Could not send e-mail", Toast.LENGTH_SHORT);
+                //Toast.makeText(this, "Could not send e-mail", Toast.LENGTH_SHORT);
                 Log.e(TAG, "Exception", e);
                 sendSuccess = false;
             }
